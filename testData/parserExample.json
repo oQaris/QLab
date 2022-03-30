@@ -1,0 +1,32 @@
+[
+  {
+    "roundId": "aaa72c29-a55a-4a24-9a1c-94e8a9d24eda",
+    "locationName": "Factoria0",
+    "locationLevel": 10,
+    "maxPositionsQuantity": 6,
+    "opponentUnits": [
+      {
+        "name": "АДАЛЬГУНД ВИТУИНДСКИ",
+        "sourceGoldCount": 132.8,
+        "goldProfit": 0.0,
+        "locatePosition": 1,
+        "evasiveness": 1,
+        "aggression": 0,
+        "responseAggression": 0,
+        "shield": 1
+      }
+    ],
+    "ourUnits": [
+      {
+        "name": "ГЕЛЕРИК ЛЕЙВГОТАХ",
+        "sourceGoldCount": 115.5,
+        "goldProfit": -0.5,
+        "locatePosition": 5,
+        "evasiveness": 0,
+        "aggression": 1,
+        "responseAggression": 0,
+        "shield": 0
+      }
+    ]
+  }
+]
