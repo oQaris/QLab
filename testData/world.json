@@ -1,0 +1,31 @@
+{
+  "WorldName": "FunnyLand",
+  "locations": [
+    {
+      "RoundID": "7943952547646014580",
+      "locationName": "Factoria15",
+      "maxPositionsQuantity": 6,
+      "opponentUnits": [
+        {
+          "Name": "Иван Факов",
+          "SourceGoldCount": 86.25,
+          "locatePosition": 2
+        }
+      ]
+    }
+  ],
+  "ourUnits": [
+    {
+      "Name": "РИНО КОТОНИЧ",
+      "SourceGoldCount": 294.25
+    },
+    {
+      "Name": "ЭТЕЛЬСКА АДАЛЬРИСИЧ",
+      "SourceGoldCount": 204.5
+    },
+    {
+      "Name": "МЕРСТЕН БРОНДРЕАКА",
+      "SourceGoldCount": 119.75
+    }
+  ]
+}

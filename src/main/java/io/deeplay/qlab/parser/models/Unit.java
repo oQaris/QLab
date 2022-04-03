@@ -4,13 +4,13 @@ import java.util.Objects;
 
 public class Unit {
     private final String name;
-    private final double sourceGoldCount;
-    private final double goldProfit;
-    private final int locatePosition;
-    private final int evasiveness;
-    private final int aggression;
-    private final int responseAggression;
-    private final int shield;
+    private double sourceGoldCount;
+    private double goldProfit;
+    private int locatePosition;
+    private int evasiveness;
+    private int aggression;
+    private int responseAggression;
+    private int shield;
 
     public Unit() {
         this.name = null;
@@ -64,6 +64,34 @@ public class Unit {
 
     public int getShield() {
         return shield;
+    }
+
+    public void setSourceGoldCount(double sourceGoldCount) {
+        this.sourceGoldCount = sourceGoldCount;
+    }
+
+    public void setGoldProfit(double goldProfit) {
+        this.goldProfit = goldProfit;
+    }
+
+    public void setLocatePosition(int locatePosition) {
+        this.locatePosition = locatePosition;
+    }
+
+    public void setEvasiveness(int evasiveness) {
+        this.evasiveness = evasiveness;
+    }
+
+    public void setAggression(int aggression) {
+        this.aggression = aggression;
+    }
+
+    public void setResponseAggression(int responseAggression) {
+        this.responseAggression = responseAggression;
+    }
+
+    public void setShield(int shield) {
+        this.shield = shield;
     }
 
     @Override

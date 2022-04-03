@@ -9,7 +9,7 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) throws FileNotFoundException {
-        List<Round> data = Parser.parse("C:/Users/oQaris/Downloads/anonymized_data.json");
+        List<Round> data = Parser.parseListRounds("C:/Users/oQaris/Downloads/anonymized_data.json");
         System.out.println(data.size());
     }
 }
