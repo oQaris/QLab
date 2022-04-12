@@ -7,7 +7,7 @@ import java.util.Random;
 
 public class Evaluator {
 
-    public double estimatedGoldProfit(Unit unit, EnemyLocation location, int locatePosition){
-        return new Random().nextDouble();
+    public double estimateGoldProfit(Unit unit, EnemyLocation location, int locatePosition) {
+        return new Random().nextDouble(unit.getGoldProfit());
     }
 }
