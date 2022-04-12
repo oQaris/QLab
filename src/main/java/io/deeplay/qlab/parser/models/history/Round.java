@@ -1,4 +1,6 @@
-package io.deeplay.qlab.parser.models;
+package io.deeplay.qlab.parser.models.history;
+
+import io.deeplay.qlab.parser.models.Unit;
 
 import java.util.List;
 import java.util.Objects;

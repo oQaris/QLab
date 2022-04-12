@@ -1,7 +1,7 @@
 package io.deeplay.qlab.algorithm;
 
-import io.deeplay.qlab.parser.models.Round;
 import io.deeplay.qlab.parser.models.Unit;
+import io.deeplay.qlab.parser.models.history.Round;
 
 import java.util.List;
 import java.util.Random;

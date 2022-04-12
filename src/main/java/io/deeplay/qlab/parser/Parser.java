@@ -3,9 +3,10 @@ package io.deeplay.qlab.parser;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
-import io.deeplay.qlab.parser.models.Round;
-import io.deeplay.qlab.parser.models.World;
+import io.deeplay.qlab.parser.models.history.Round;
+import io.deeplay.qlab.parser.models.input.InputData;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.lang.reflect.Type;
@@ -15,14 +16,14 @@ public class Parser {
     private static final Type TYPE = new TypeToken<List<Round>>() {
     }.getType();
 
-    public static List<Round> parseListRounds(String filename) throws FileNotFoundException {
+    public static List<Round> parseListRounds(File file) throws FileNotFoundException {
         Gson gson = new Gson();
-        JsonReader reader = new JsonReader(new FileReader(filename));
+        JsonReader reader = new JsonReader(new FileReader(file));
         return gson.fromJson(reader, TYPE);
     }
 
-    public static World parseWorld(String data) {
+    public static InputData parseInput(String data) {
         Gson gson = new Gson();
-        return gson.fromJson(data, World.class);
+        return gson.fromJson(data, InputData.class);
     }
 }
