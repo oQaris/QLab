@@ -4,9 +4,16 @@ import java.util.Objects;
 
 public class UnitWithLocation {
     private final String name;
-    private final double sourceGoldCount;
-    private final int locatePosition;
-    private final String locationName;
+    private double sourceGoldCount;
+    private int locatePosition;
+    private String locationName;
+
+    public UnitWithLocation(String name) {
+        this.name = name;
+        this.sourceGoldCount = 0.0;
+        this.locatePosition = 0;
+        this.locationName = "";
+    }
 
     public UnitWithLocation(String name, double sourceGoldCount, int locatePosition, String locationName) {
         this.name = name;
@@ -29,6 +36,18 @@ public class UnitWithLocation {
 
     public String getLocationName() {
         return locationName;
+    }
+
+    public void setSourceGoldCount(double sourceGoldCount) {
+        this.sourceGoldCount = sourceGoldCount;
+    }
+
+    public void setLocatePosition(int locatePosition) {
+        this.locatePosition = locatePosition;
+    }
+
+    public void setLocationName(String locationName) {
+        this.locationName = locationName;
     }
 
     @Override
