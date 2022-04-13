@@ -4,10 +4,10 @@ import io.deeplay.qlab.parser.models.output.UnitWithLocation;
 
 import java.util.Set;
 
-public class Evaluator implements IEvaluator {
+public class ZeroEvaluator implements IEvaluator {
 
     @Override
-    public double estimatedGoldProfit(Set<UnitWithLocation> units) {
+    public double evaluateGoldProfit(Set<UnitWithLocation> units) {
         return 0;
     }
 }

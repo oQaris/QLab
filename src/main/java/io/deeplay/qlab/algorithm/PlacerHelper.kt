@@ -14,21 +14,21 @@ fun findBestArrangement(units: Set<Unit>, locations: Set<EnemyLocation>, strateg
         return emptySet()
 
     return locations.flatMap {
-        arrangedUnitsByLocation(units, it)
+        arrangeUnitsOnLocation(units, it)
     }.maxByOrNull {
         counter++ // log
-        strategy.estimatedGoldProfit(it.toSet())
+        strategy.evaluateGoldProfit(it.toSet())
     }!!.toSet().also {
         println(counter) // log
     }
 }
 
-private fun arrangedUnitsByLocation(units: Set<Unit>, location: EnemyLocation): Sequence<List<UnitWithLocation>> {
+private fun arrangeUnitsOnLocation(units: Set<Unit>, location: EnemyLocation): Sequence<List<UnitWithLocation>> {
     return units.powerset()
         .filter { it.size <= location.maxPositionsQuantity }
         .flatMap { unitSet ->
             val places = (0 until location.maxPositionsQuantity).toList()
-            placeFixSize(unitSet, places).map { unitsWithPos ->
+            generateUnitPositionPairs(unitSet, places).map { unitsWithPos ->
                 unitsWithPos.map {
                     it.first.toUnitWithLocation(
                         location.locationName, it.second
@@ -38,7 +38,7 @@ private fun arrangedUnitsByLocation(units: Set<Unit>, location: EnemyLocation): 
         }
 }
 
-private fun placeFixSize(units: Collection<Unit>, places: Collection<Int>): Sequence<List<Pair<Unit, Int>>> {
+private fun generateUnitPositionPairs(units: Collection<Unit>, places: Collection<Int>): Sequence<List<Pair<Unit, Int>>> {
     require(places.size >= units.size)
     return places.combinations(units.size)
         .flatMap { it.permutations() } // Убрать, если позиции не влияют на юнитов (т.е. 123 = 312)

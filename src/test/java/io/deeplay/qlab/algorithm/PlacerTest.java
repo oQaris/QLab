@@ -46,8 +46,8 @@ class PlacerTest {
                 // Один размер
                 () -> assertEquals(expected.size(), actual.size()),
                 // Совпадает оценка
-                () -> assertEquals(new SumSourceProfitEvaluator().estimatedGoldProfit(expected),
-                        new SumSourceProfitEvaluator().estimatedGoldProfit(actual)),
+                () -> assertEquals(new SumSourceProfitEvaluator().evaluateGoldProfit(expected),
+                        new SumSourceProfitEvaluator().evaluateGoldProfit(actual)),
                 // Нет одинаковых позиций
                 () -> assertEquals(expected.stream().map(UnitWithLocation::getLocatePosition).distinct().count(),
                         actual.stream().map(UnitWithLocation::getLocatePosition).distinct().count()),
@@ -71,7 +71,7 @@ class PlacerTest {
 
         assertAll(
                 () -> assertEquals(5, actual.size()),
-                () -> assertEquals(1 + 2 + 3 + 4 + 5, new SumSourceProfitEvaluator().estimatedGoldProfit(actual)),
+                () -> assertEquals(1 + 2 + 3 + 4 + 5, new SumSourceProfitEvaluator().evaluateGoldProfit(actual)),
                 () -> assertEquals(5, actual.stream().map(UnitWithLocation::getLocatePosition).distinct().count()),
                 () -> assertEquals(5, actual.stream().map(UnitWithLocation::getName).distinct().count()));
     }
@@ -79,7 +79,7 @@ class PlacerTest {
     private static class SumSourceProfitEvaluator implements IEvaluator {
 
         @Override
-        public double estimatedGoldProfit(Set<UnitWithLocation> units) {
+        public double evaluateGoldProfit(Set<UnitWithLocation> units) {
             return units.stream().mapToDouble(UnitWithLocation::getSourceGoldCount).sum();
         }
     }
