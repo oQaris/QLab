@@ -11,7 +11,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class MegaFinderTest {
+class PlacerTest {
 
     @Test
     void findDisposition_EmptyTest() {
@@ -22,7 +22,7 @@ class MegaFinderTest {
 
         Set<UnitWithLocation> expected = Set.of();
 
-        assertEquals(expected, new MegaFinder(new SumSourceProfitEvaluator())
+        assertEquals(expected, new Placer(new SumSourceProfitEvaluator())
                 .findDisposition(units, locations));
     }
 
@@ -39,7 +39,7 @@ class MegaFinderTest {
                 new UnitWithLocation("4", 4.0, 1, "LOC"),
                 new UnitWithLocation("3", 3.0, 2, "LOC"));
 
-        Set<UnitWithLocation> actual = new MegaFinder(new SumSourceProfitEvaluator())
+        Set<UnitWithLocation> actual = new Placer(new SumSourceProfitEvaluator())
                 .findDisposition(units, locations);
 
         assertAll(
@@ -66,7 +66,7 @@ class MegaFinderTest {
                 new EnemyLocation("L2", 2, 9, List.of()),
                 new EnemyLocation("L3", 3, 9, List.of()));
 
-        Set<UnitWithLocation> actual = new MegaFinder(new SumSourceProfitEvaluator())
+        Set<UnitWithLocation> actual = new Placer(new SumSourceProfitEvaluator())
                 .findDisposition(units, locations);
 
         assertAll(
