@@ -5,12 +5,12 @@ import io.deeplay.qlab.parser.models.Unit;
 import java.util.List;
 import java.util.Objects;
 
-public class InputData {
+public class World {
     private final String worldName;
     private final List<EnemyLocation> locations;
     private final List<Unit> ourUnits;
 
-    public InputData(String worldName, List<EnemyLocation> locations, List<Unit> ourUnits) {
+    public World(String worldName, List<EnemyLocation> locations, List<Unit> ourUnits) {
         this.worldName = worldName;
         this.locations = locations;
         this.ourUnits = ourUnits;
@@ -31,10 +31,10 @@ public class InputData {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof InputData inputData)) return false;
-        return Objects.equals(worldName, inputData.worldName)
-                && Objects.equals(locations, inputData.locations)
-                && Objects.equals(ourUnits, inputData.ourUnits);
+        if (!(o instanceof World world)) return false;
+        return Objects.equals(worldName, world.worldName)
+                && Objects.equals(locations, world.locations)
+                && Objects.equals(ourUnits, world.ourUnits);
     }
 
     @Override

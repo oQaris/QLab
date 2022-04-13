@@ -1,13 +1,13 @@
 package io.deeplay.qlab.algorithm;
 
-import io.deeplay.qlab.parser.models.Unit;
-import io.deeplay.qlab.parser.models.input.EnemyLocation;
+import io.deeplay.qlab.parser.models.output.UnitWithLocation;
 
-import java.util.Random;
+import java.util.Set;
 
-public class Evaluator {
+public class Evaluator implements IEvaluator {
 
-    public double estimatedGoldProfit(Unit unit, EnemyLocation location, int locatePosition){
-        return new Random().nextDouble();
+    @Override
+    public double estimatedGoldProfit(Set<UnitWithLocation> units) {
+        return 0;
     }
 }

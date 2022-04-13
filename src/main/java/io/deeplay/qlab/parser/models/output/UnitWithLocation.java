@@ -8,13 +8,6 @@ public class UnitWithLocation {
     private int locatePosition;
     private String locationName;
 
-    public UnitWithLocation(String name) {
-        this.name = name;
-        this.sourceGoldCount = 0.0;
-        this.locatePosition = 0;
-        this.locationName = "";
-    }
-
     public UnitWithLocation(String name, double sourceGoldCount, int locatePosition, String locationName) {
         this.name = name;
         this.sourceGoldCount = sourceGoldCount;
@@ -30,20 +23,20 @@ public class UnitWithLocation {
         return sourceGoldCount;
     }
 
-    public int getLocatePosition() {
-        return locatePosition;
-    }
-
-    public String getLocationName() {
-        return locationName;
-    }
-
     public void setSourceGoldCount(double sourceGoldCount) {
         this.sourceGoldCount = sourceGoldCount;
     }
 
+    public int getLocatePosition() {
+        return locatePosition;
+    }
+
     public void setLocatePosition(int locatePosition) {
         this.locatePosition = locatePosition;
+    }
+
+    public String getLocationName() {
+        return locationName;
     }
 
     public void setLocationName(String locationName) {
@@ -63,5 +56,15 @@ public class UnitWithLocation {
     @Override
     public int hashCode() {
         return Objects.hash(name, sourceGoldCount, locatePosition, locationName);
+    }
+
+    @Override
+    public String toString() {
+        return "UnitWithLocation{" +
+                "name='" + name + '\'' +
+                ", sourceGoldCount=" + sourceGoldCount +
+                ", locatePosition=" + locatePosition +
+                ", locationName='" + locationName + '\'' +
+                '}';
     }
 }

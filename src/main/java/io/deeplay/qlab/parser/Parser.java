@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import io.deeplay.qlab.parser.models.history.Round;
-import io.deeplay.qlab.parser.models.input.InputData;
+import io.deeplay.qlab.parser.models.input.World;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -22,8 +22,8 @@ public class Parser {
         return gson.fromJson(reader, TYPE);
     }
 
-    public static InputData parseInput(String data) {
+    public static World parseInput(String data) {
         Gson gson = new Gson();
-        return gson.fromJson(data, InputData.class);
+        return gson.fromJson(data, World.class);
     }
 }

@@ -3,7 +3,7 @@ package io.deeplay.qlab.parser;
 import io.deeplay.qlab.parser.models.Unit;
 import io.deeplay.qlab.parser.models.history.Round;
 import io.deeplay.qlab.parser.models.input.EnemyLocation;
-import io.deeplay.qlab.parser.models.input.InputData;
+import io.deeplay.qlab.parser.models.input.World;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -29,7 +29,7 @@ class ParserTest {
     @Test
     void parseInputTest() throws IOException {
         String data = Files.readString(Path.of("testData/world.json"));
-        InputData expected = new InputData("FunnyLand",
+        World expected = new World("FunnyLand",
                 List.of(new EnemyLocation("Factoria15", 10, 6,
                         List.of(new Unit("Иван Факов", 86.25, 2)))),
                 List.of(new Unit("РИНО КОТОНИЧ", 294.25),
