@@ -24,10 +24,11 @@ fun findBestArrangement(units: Set<Unit>, locations: Set<EnemyLocation>, strateg
 }
 
 private fun arrangeUnitsOnLocation(units: Set<Unit>, location: EnemyLocation): Sequence<List<UnitWithLocation>> {
+    val enemyPos = location.opponentUnits.map { it.locatePosition }.toSet()
     return units.powerset()
-        .filter { it.size <= location.maxPositionsQuantity }
+        .filter { it.size <= location.maxPositionsQuantity  - enemyPos.size }
         .flatMap { unitSet ->
-            val places = (0 until location.maxPositionsQuantity).toList()
+            val places = (0 until location.maxPositionsQuantity).minus(enemyPos)
             generateUnitPositionPairs(unitSet, places).map { unitsWithPos ->
                 unitsWithPos.map {
                     it.first.toUnitWithLocation(

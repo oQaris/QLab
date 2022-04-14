@@ -12,6 +12,10 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class PlacerTest {
+    private static final String DIFF_SIZE = "Разный размер";
+    private static final String DIFF_PROFIT_ESTIMATION = "Не совпадает оценка";
+    private static final String POS_COLLAPSE = "Коллапс позиций";
+    private static final String UNIT_COLLAPSE = "Коллапс юнитов";
 
     @Test
     void findDisposition_EmptyTest() {
@@ -33,27 +37,17 @@ class PlacerTest {
                 new Unit("3", 3.0), new Unit("4", 4.0), new Unit("5", 5.0));
 
         Set<EnemyLocation> locations = Set.of(new EnemyLocation("LOC", 999, 3,
-                List.of(new Unit("enemy1", 99.0), new Unit("enemy2", 99.0))));
-
-        Set<UnitWithLocation> expected = Set.of(new UnitWithLocation("5", 5.0, 0, "LOC"),
-                new UnitWithLocation("4", 4.0, 1, "LOC"),
-                new UnitWithLocation("3", 3.0, 2, "LOC"));
+                List.of(new Unit("enemy1", 99.0, 0), new Unit("enemy2", 99.0, 2))));
 
         Set<UnitWithLocation> actual = new Placer(new SumSourceProfitEvaluator())
                 .findDisposition(units, locations);
 
         assertAll(
-                // Один размер
-                () -> assertEquals(expected.size(), actual.size()),
-                // Совпадает оценка
-                () -> assertEquals(new SumSourceProfitEvaluator().evaluateGoldProfit(expected),
-                        new SumSourceProfitEvaluator().evaluateGoldProfit(actual)),
-                // Нет одинаковых позиций
-                () -> assertEquals(expected.stream().map(UnitWithLocation::getLocatePosition).distinct().count(),
-                        actual.stream().map(UnitWithLocation::getLocatePosition).distinct().count()),
-                // Все юниты различны
-                () -> assertEquals(expected.stream().map(UnitWithLocation::getName).distinct().count(),
-                        actual.stream().map(UnitWithLocation::getName).distinct().count()));
+                () -> assertEquals(1, actual.size(), DIFF_SIZE),
+                () -> assertEquals(5, new SumSourceProfitEvaluator().evaluateGoldProfit(actual), DIFF_PROFIT_ESTIMATION),
+                () -> assertEquals(1, actual.stream().map(UnitWithLocation::getLocatePosition).count(), POS_COLLAPSE),
+                () -> assertEquals(1, actual.stream().map(UnitWithLocation::getName).count(), UNIT_COLLAPSE)
+        );
     }
 
     @Test
@@ -70,13 +64,15 @@ class PlacerTest {
                 .findDisposition(units, locations);
 
         assertAll(
-                () -> assertEquals(5, actual.size()),
-                () -> assertEquals(1 + 2 + 3 + 4 + 5, new SumSourceProfitEvaluator().evaluateGoldProfit(actual)),
-                () -> assertEquals(5, actual.stream().map(UnitWithLocation::getLocatePosition).distinct().count()),
-                () -> assertEquals(5, actual.stream().map(UnitWithLocation::getName).distinct().count()));
+                () -> assertEquals(5, actual.size(), DIFF_SIZE),
+                () -> assertEquals(1 + 2 + 3 + 4 + 5, new SumSourceProfitEvaluator().evaluateGoldProfit(actual),
+                        DIFF_PROFIT_ESTIMATION),
+                () -> assertEquals(5, actual.stream().map(UnitWithLocation::getLocatePosition).count(), POS_COLLAPSE),
+                () -> assertEquals(5, actual.stream().map(UnitWithLocation::getName).count(), UNIT_COLLAPSE)
+        );
     }
 
-    private static class SumSourceProfitEvaluator implements IEvaluator {
+    private static final class SumSourceProfitEvaluator implements IEvaluator {
 
         @Override
         public double evaluateGoldProfit(Set<UnitWithLocation> units) {
