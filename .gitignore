@@ -11,6 +11,8 @@
 .mtj.tmp/
 
 /.idea
+/target
+/testData/anonymized_data.json
 
 # Package Files #
 *.jar
