@@ -20,7 +20,7 @@ public class Main {
         final CmdLineArgs parsedArgs = CmdLineArgs.parse(args);
         String historyPath = Objects.requireNonNullElse(parsedArgs.getHistory(), "testData/anonymized_data.json");
         
-        List<Round> rounds = RoundListFilter.filter(Parser.parseListRounds(new File(historyPath)));
+        List<Round> rounds = RoundListFilter.filter(Parser.parseRoundList(new File(historyPath)));
         
         System.out.println("Round list size: " + rounds.size());
         System.out.println();

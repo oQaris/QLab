@@ -23,7 +23,7 @@ class ParserTest {
                 List.of(new Unit("АДАЛЬГУНД ВИТУИНДСКИ", 132.8, 0.0, 1, 1, 0, 0, 1)),
                 List.of(new Unit("ГЕЛЕРИК ЛЕЙВГОТАХ", 115.5, -0.5, 5, 0, 1, 0, 0))));
 
-        assertEquals(expected, Parser.parseListRounds(new File("testData/listRounds.json")));
+        assertEquals(expected, Parser.parseRoundList(new File("testData/listRounds.json")));
     }
 
     @Test
