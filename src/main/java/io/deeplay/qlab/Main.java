@@ -2,18 +2,23 @@ package io.deeplay.qlab;
 
 import io.deeplay.qlab.parser.Parser;
 import io.deeplay.qlab.parser.models.history.Round;
+import io.deeplay.qlab.util.CmdLineArgs;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Main {
 
     public static void main(String[] args) throws FileNotFoundException {
-        List<Round> data = Parser.parseListRounds(new File("testData/anonymized_data.json"));
+        final CmdLineArgs parsedArgs = CmdLineArgs.parse(args);
+        String historyPath = Objects.requireNonNullElse(parsedArgs.getHistory(), "testData/anonymized_data.json");
+        
+        List<Round> data = Parser.parseListRounds(new File(historyPath));
 
         Map<String, Set<Integer>> levelsByLocations = data.stream()
                 .collect(Collectors.groupingBy(Round::getLocationName))

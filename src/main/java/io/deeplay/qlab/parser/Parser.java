@@ -13,8 +13,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 public class Parser {
-    private static final Type TYPE = new TypeToken<List<Round>>() {
-    }.getType();
+    private static final Type TYPE = TypeToken.getParameterized(List.class, Round.class).getType();
 
     public static List<Round> parseListRounds(File file) throws FileNotFoundException {
         Gson gson = new Gson();
