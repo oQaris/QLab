@@ -20,9 +20,13 @@ public class Main {
         final CmdLineArgs parsedArgs = CmdLineArgs.parse(args);
         String historyPath = Objects.requireNonNullElse(parsedArgs.getHistory(), "testData/anonymized_data.json");
         
-        List<Round> rounds = RoundListFilter.filter(Parser.parseRoundList(new File(historyPath)));
+        List<Round> rounds = Parser.parseRoundList(new File(historyPath));
         
         System.out.println("Round list size: " + rounds.size());
+        
+        rounds = RoundListFilter.filter(rounds);
+        
+        System.out.println("Filtered round list size: " + rounds.size());
         System.out.println();
         
         Map<String, Set<Integer>> levelsByLocations = rounds.stream()
