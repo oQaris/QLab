@@ -26,12 +26,11 @@ public class RoundListFilter {
     private static final Predicate<Round> actionsAreBool = round -> {
         Set<Integer> possibleValues = Set.of(0, 1);
         
-        return getAllUnits(round).stream().allMatch(unit -> {
-            return possibleValues.contains(unit.getEvasiveness())
-                    && possibleValues.contains(unit.getAggression())
-                    && possibleValues.contains(unit.getResponseAggression())
-                    && possibleValues.contains(unit.getShield());
-        });
+        return getAllUnits(round).stream().allMatch(unit ->
+                possibleValues.contains(unit.getEvasiveness())
+                        && possibleValues.contains(unit.getAggression())
+                        && possibleValues.contains(unit.getResponseAggression())
+                        && possibleValues.contains(unit.getShield()));
     };
     
     
