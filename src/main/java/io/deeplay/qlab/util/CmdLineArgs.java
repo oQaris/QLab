@@ -6,8 +6,9 @@ import java.util.regex.Pattern;
 
 
 public class CmdLineArgs {
-    private static final Pattern ARG_PATTERN = Pattern.compile("^--(?<name>[\\w]+)=(?<value>.+)$");
+    private static final Pattern ARG_PATTERN = Pattern.compile("^--(?<key>[\\w]+)=(?<value>.+)$");
     private String history;
+    private String filtered;
     
     
     private CmdLineArgs() {
@@ -23,8 +24,14 @@ public class CmdLineArgs {
             if (!argMatcher.find())
                 continue;
             
-            if ("history".equals(argMatcher.group("name")))
-                parsedArgs.setHistory(argMatcher.group("value"));
+            String key = argMatcher.group("key");
+            String value = argMatcher.group("value");
+            
+            if ("history".equals(key))
+                parsedArgs.setHistory(value);
+            else if ("filtered".equals(key)) {
+                parsedArgs.setFiltered(value);
+            }
         }
         
         return parsedArgs;
@@ -38,5 +45,15 @@ public class CmdLineArgs {
     
     public void setHistory(String history) {
         this.history = history;
+    }
+    
+    
+    public String getFiltered() {
+        return filtered;
+    }
+    
+    
+    public void setFiltered(String filtered) {
+        this.filtered = filtered;
     }
 }

@@ -8,8 +8,8 @@ import io.deeplay.qlab.parser.models.history.Round;
 import io.deeplay.qlab.parser.models.input.World;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -18,10 +18,10 @@ public class Parser {
     private static final Type TYPE = TypeToken.getParameterized(List.class, Round.class).getType();
     
     
-    public static List<Round> parseRoundList(File file) throws FileNotFoundException {
-        Gson gson = new Gson();
-        JsonReader reader = new JsonReader(new FileReader(file));
-        return gson.fromJson(reader, TYPE);
+    public static List<Round> parseRoundList(File file) throws IOException {
+        try (JsonReader reader = new JsonReader(new FileReader(file))) {
+            return new Gson().fromJson(reader, TYPE);
+        }
     }
     
     
