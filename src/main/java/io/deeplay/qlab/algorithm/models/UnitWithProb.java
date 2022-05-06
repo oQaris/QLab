@@ -11,7 +11,6 @@ public class UnitWithProb {
     private final Double responseAggression;
     private int locationPosition;
 
-
     public UnitWithProb(String name, Double sourceGoldCount, Double shield, Double evasiveness,
                         Double aggression, Double responseAggression, int locationPosition) {
         this.name = name;

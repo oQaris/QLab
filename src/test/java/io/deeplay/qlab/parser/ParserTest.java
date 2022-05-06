@@ -8,7 +8,6 @@ import io.deeplay.qlab.parser.models.input.World;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,11 +22,10 @@ class ParserTest {
         List<Round> expected = List.of(new Round("aaa72c29-a55a-4a24-9a1c-94e8a9d24eda", "Factoria0", 10, 6,
                 List.of(new Unit("АДАЛЬГУНД ВИТУИНДСКИ", 132.8, 0.0, 1, 1, 0, 0, 1)),
                 List.of(new Unit("ГЕЛЕРИК ЛЕЙВГОТАХ", 115.5, -0.5, 5, 0, 1, 0, 0))));
-        
+
         assertEquals(expected, Parser.parseRoundList(new File("testData/listRounds.json")));
     }
-    
-    
+
     @Test
     void parseInputTest() throws IOException {
         String data = Files.readString(Path.of("testData/world.json"));
@@ -37,7 +35,7 @@ class ParserTest {
                 List.of(new Unit("РИНО КОТОНИЧ", 294.25),
                         new Unit("ЭТЕЛЬСКА АДАЛЬРИСИЧ", 204.5),
                         new Unit("МЕРСТЕН БРОНДРЕАКА", 119.75)));
-        
+
         assertEquals(expected, Parser.parseInput(data));
     }
 }

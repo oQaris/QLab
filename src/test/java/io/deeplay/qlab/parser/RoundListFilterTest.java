@@ -1,6 +1,5 @@
 package io.deeplay.qlab.parser;
 
-
 import io.deeplay.qlab.parser.models.Unit;
 import io.deeplay.qlab.parser.models.history.Round;
 import org.junit.jupiter.api.Test;
@@ -8,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 
 public class RoundListFilterTest {
     @Test
@@ -23,14 +21,13 @@ public class RoundListFilterTest {
                 List.of(new Unit("ЛИАГОРД ОНГКЕЕЦ", 10)),
                 List.of()
         );
-        
+
         List<Round> input = List.of(okay, zeroSizedEmpty, zeroSizedNonEmpty);
         List<Round> expected = List.of(okay);
-        
+
         assertEquals(expected, RoundListFilter.filter(input));
     }
-    
-    
+
     @Test
     void filter_NonEmptyLocationsTest() {
         Round okay = new Round("45987fd3", "Factoria304", 10, 6,
@@ -40,14 +37,13 @@ public class RoundListFilterTest {
         );
         Round emptyZeroSized = new Round("f11c3f18", "Factoria770", 50, 0, List.of(), List.of());
         Round emptyNonZeroSized = new Round("f1151918", "Factoria771", 51, 5, List.of(), List.of());
-        
+
         List<Round> input = List.of(okay, emptyZeroSized, emptyNonZeroSized);
         List<Round> expected = List.of(okay);
-        
+
         assertEquals(expected, RoundListFilter.filter(input));
     }
-    
-    
+
     @Test
     void filter_ActionsAreBoolTest() {
         Round okay = new Round("3ecb8727", "Factoria414", 50, 9,
@@ -58,14 +54,13 @@ public class RoundListFilterTest {
                 List.of(new Unit("ОРТАРД ТЕАИФНИК", 116.92, 0.5, 0, 0, 1, 0, 0)),
                 List.of(new Unit("АДАЛЬМЕР ОНКУШВИЛИ", 117.1, -0.5, 3, 0, 0, 0, -1))
         );
-        
+
         List<Round> input = List.of(okay, nonBool);
         List<Round> expected = List.of(okay);
-        
+
         assertEquals(expected, RoundListFilter.filter(input));
     }
-    
-    
+
     @Test
     void filter_UnitsAreOnExistingPositionsTest() {
         Round okay = new Round("3ecb8727", "Factoria414", 50, 9,
@@ -80,14 +75,13 @@ public class RoundListFilterTest {
                 List.of(new Unit("ОРТАРД ТЕАИФНИК", 116.92, 0.5, -5, 0, 1, 0, 0)),
                 List.of(new Unit("АДАЛЬМЕР ОНКУШВИЛИ", 117.1, -0.5, 3, 0, 0, 0, 1))
         );
-        
+
         List<Round> input = List.of(okay, tooBig, tooSmall);
         List<Round> expected = List.of(okay);
-        
+
         assertEquals(expected, RoundListFilter.filter(input));
     }
-    
-    
+
     @Test
     void filter_UnitsAreOnDifferentPositionsTest() {
         Round okay = new Round("3ecb8727", "Factoria414", 50, 9,
@@ -105,14 +99,13 @@ public class RoundListFilterTest {
                         new Unit("ВАУМ РИСАНИОЯКА", 117.1, -0.5, 1, 0, 0, 0, 1)),
                 List.of(new Unit("АДАЛЬМЕР ОНКУШВИЛИ", 117.1, 0, 2, 0, 0, 0, 1))
         );
-        
+
         List<Round> input = List.of(oneTeam, okay, differentTeams);
         List<Round> expected = List.of(okay);
-        
+
         assertEquals(expected, RoundListFilter.filter(input));
     }
-    
-    
+
     @Test
     void filter_ZeroGoldProfitSumTest() {
         Round okay = new Round("3ecb8727", "Factoria414", 50, 9,
@@ -130,10 +123,10 @@ public class RoundListFilterTest {
                         new Unit("ВАУМ РИСАНИОЯКА", 117.1, -0.5, 1, 0, 0, 0, 1)),
                 List.of(new Unit("АДАЛЬМЕР ОНКУШВИЛИ", 117.1, 0, 2, 0, 0, 0, 1))
         );
-        
+
         List<Round> input = List.of(okay, tooBig, tooSmall);
         List<Round> expected = List.of(okay);
-        
+
         assertEquals(expected, RoundListFilter.filter(input));
     }
 }
