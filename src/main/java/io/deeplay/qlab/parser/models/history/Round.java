@@ -1,6 +1,6 @@
 package io.deeplay.qlab.parser.models.history;
 
-import io.deeplay.qlab.parser.models.Unit;
+import io.deeplay.qlab.parser.models.UnitWithResult;
 
 import java.util.List;
 import java.util.Objects;
@@ -10,8 +10,8 @@ public class Round {
     private final String locationName;
     private final int locationLevel;
     private final int maxPositionsQuantity;
-    private final List<Unit> opponentUnits;
-    private final List<Unit> ourUnits;
+    private final List<UnitWithResult> opponentUnits;
+    private final List<UnitWithResult> ourUnits;
 
     public Round() {
         this.roundId = null;
@@ -22,13 +22,13 @@ public class Round {
         this.ourUnits = null;
     }
 
-    public Round(String roundId, String locationName, int locationLevel, int maxPositionsQuantity, List<Unit> opponentUnits, List<Unit> ourUnits) {
+    public Round(String roundId, String locationName, int locationLevel, int maxPositionsQuantity, List<UnitWithResult> opponentUnitWithResults, List<UnitWithResult> ourUnitWithResults) {
         this.roundId = roundId;
         this.locationName = locationName;
         this.locationLevel = locationLevel;
         this.maxPositionsQuantity = maxPositionsQuantity;
-        this.opponentUnits = opponentUnits;
-        this.ourUnits = ourUnits;
+        this.opponentUnits = opponentUnitWithResults;
+        this.ourUnits = ourUnitWithResults;
     }
 
     public String getRoundId() {
@@ -47,11 +47,11 @@ public class Round {
         return maxPositionsQuantity;
     }
 
-    public List<Unit> getOpponentUnits() {
+    public List<UnitWithResult> getOpponentUnits() {
         return opponentUnits;
     }
 
-    public List<Unit> getOurUnits() {
+    public List<UnitWithResult> getOurUnits() {
         return ourUnits;
     }
 

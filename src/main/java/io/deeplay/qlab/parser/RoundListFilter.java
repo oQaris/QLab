@@ -1,6 +1,7 @@
 package io.deeplay.qlab.parser;
 
-import io.deeplay.qlab.parser.models.Unit;
+
+import io.deeplay.qlab.parser.models.UnitWithResult;
 import io.deeplay.qlab.parser.models.history.Round;
 
 import java.util.ArrayList;
@@ -9,6 +10,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
 
 public class RoundListFilter {
     private static final double EPS = 1E-9;
@@ -33,21 +35,23 @@ public class RoundListFilter {
                     unit.getLocatePosition() >= 0 && unit.getLocatePosition() < round.getMaxPositionsQuantity());
 
     private static final Predicate<Round> unitsAreOnDifferentPositions = round -> {
-        List<Unit> units = getAllUnits(round);
-        IntStream occupiedPositions = units.stream().mapToInt(Unit::getLocatePosition).distinct();
+        List<UnitWithResult> units = getAllUnits(round);
+        IntStream occupiedPositions = units.stream().mapToInt(UnitWithResult::getLocatePosition).distinct();
 
         return units.size() == occupiedPositions.count();
     };
 
     private static final Predicate<Round> zeroGoldProfitSum = round -> getAllUnits(round).stream()
-            .map(Unit::getGoldProfit).reduce(0., Double::sum) < EPS;
+            .map(UnitWithResult::getGoldProfit).reduce(0., Double::sum) < EPS;
 
-    private static List<Unit> getAllUnits(Round round) {
-        List<Unit> units = new ArrayList<>(round.getOurUnits());
+
+    private static List<UnitWithResult> getAllUnits(Round round) {
+        List<UnitWithResult> units = new ArrayList<>(round.getOurUnits());
         units.addAll(round.getOpponentUnits());
 
         return units;
     }
+
 
     public static List<Round> filter(List<Round> rounds) {
         return rounds.stream()

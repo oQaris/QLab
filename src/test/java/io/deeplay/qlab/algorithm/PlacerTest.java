@@ -1,6 +1,7 @@
 package io.deeplay.qlab.algorithm;
 
-import io.deeplay.qlab.parser.models.Unit;
+import io.deeplay.qlab.algorithm.eval.IEvaluator;
+import io.deeplay.qlab.parser.models.UnitWithResult;
 import io.deeplay.qlab.parser.models.input.EnemyLocation;
 import io.deeplay.qlab.parser.models.output.UnitWithLocation;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,7 @@ class PlacerTest {
     @Test
     void findDisposition_EmptyTest() {
 
-        Set<Unit> units = Set.of();
+        Set<UnitWithResult> units = Set.of();
 
         Set<EnemyLocation> locations = Set.of();
 
@@ -33,11 +34,11 @@ class PlacerTest {
     @Test
     void findDisposition_OneLocationTest() {
 
-        Set<Unit> units = Set.of(new Unit("1", 1.0), new Unit("2", 2.0),
-                new Unit("3", 3.0), new Unit("4", 4.0), new Unit("5", 5.0));
+        Set<UnitWithResult> units = Set.of(new UnitWithResult("1", 1.0), new UnitWithResult("2", 2.0),
+                new UnitWithResult("3", 3.0), new UnitWithResult("4", 4.0), new UnitWithResult("5", 5.0));
 
         Set<EnemyLocation> locations = Set.of(new EnemyLocation("LOC", 999, 3,
-                List.of(new Unit("enemy1", 99.0, 0), new Unit("enemy2", 99.0, 2))));
+                List.of(new UnitWithResult("enemy1", 99.0, 0), new UnitWithResult("enemy2", 99.0, 2))));
 
         Set<UnitWithLocation> actual = new Placer(new SumSourceProfitEvaluator())
                 .findDisposition(units, locations);
@@ -53,8 +54,8 @@ class PlacerTest {
     @Test
     void findDisposition_ManyLocationTest() {
 
-        Set<Unit> units = Set.of(new Unit("1", 1.0), new Unit("2", 2.0),
-                new Unit("3", 3.0), new Unit("4", 4.0), new Unit("5", 5.0));
+        Set<UnitWithResult> units = Set.of(new UnitWithResult("1", 1.0), new UnitWithResult("2", 2.0),
+                new UnitWithResult("3", 3.0), new UnitWithResult("4", 4.0), new UnitWithResult("5", 5.0));
 
         Set<EnemyLocation> locations = Set.of(new EnemyLocation("L1", 1, 9, List.of()),
                 new EnemyLocation("L2", 2, 9, List.of()),

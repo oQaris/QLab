@@ -3,13 +3,18 @@ package io.deeplay.qlab.algorithm
 import com.github.shiguruikai.combinatoricskt.combinations
 import com.github.shiguruikai.combinatoricskt.permutations
 import com.github.shiguruikai.combinatoricskt.powerset
-import io.deeplay.qlab.parser.models.Unit
+import io.deeplay.qlab.algorithm.eval.IEvaluator
+import io.deeplay.qlab.parser.models.UnitWithResult
 import io.deeplay.qlab.parser.models.input.EnemyLocation
 import io.deeplay.qlab.parser.models.output.UnitWithLocation
 
 var counter = 0
 
-fun findBestArrangement(units: Set<Unit>, locations: Set<EnemyLocation>, strategy: IEvaluator): Set<UnitWithLocation> {
+fun findBestArrangement(
+    units: Set<UnitWithResult>,
+    locations: Set<EnemyLocation>,
+    strategy: IEvaluator
+): Set<UnitWithLocation> {
     if (locations.isEmpty() || units.isEmpty())
         return emptySet()
 
@@ -23,7 +28,10 @@ fun findBestArrangement(units: Set<Unit>, locations: Set<EnemyLocation>, strateg
     }
 }
 
-private fun arrangeUnitsOnLocation(units: Set<Unit>, location: EnemyLocation): Sequence<List<UnitWithLocation>> {
+private fun arrangeUnitsOnLocation(
+    units: Set<UnitWithResult>,
+    location: EnemyLocation
+): Sequence<List<UnitWithLocation>> {
     val enemyPos = location.opponentUnits.map { it.locatePosition }.toSet()
     return units.powerset()
         .filter { it.size <= location.maxPositionsQuantity - enemyPos.size }
@@ -32,7 +40,7 @@ private fun arrangeUnitsOnLocation(units: Set<Unit>, location: EnemyLocation): S
             generateUnitPositionPairs(unitSet, places).map { unitsWithPos ->
                 unitsWithPos.map {
                     it.first.toUnitWithLocation(
-                        location.locationName, it.second
+                        location, it.second
                     )
                 }
             }
@@ -40,14 +48,14 @@ private fun arrangeUnitsOnLocation(units: Set<Unit>, location: EnemyLocation): S
 }
 
 private fun generateUnitPositionPairs(
-    units: Collection<Unit>,
+    units: Collection<UnitWithResult>,
     places: Collection<Int>
-): Sequence<List<Pair<Unit, Int>>> {
+): Sequence<List<Pair<UnitWithResult, Int>>> {
     require(places.size >= units.size)
     return places.combinations(units.size)
         .flatMap { it.permutations() } // Убрать, если позиции не влияют на юнитов (т.е. 123 = 312)
         .map { units.zip(it) }
 }
 
-private fun Unit.toUnitWithLocation(locationName: String, position: Int) =
-    UnitWithLocation(name, sourceGoldCount, position, locationName)
+private fun UnitWithResult.toUnitWithLocation(location: EnemyLocation, position: Int) =
+    UnitWithLocation(name, sourceGoldCount, position, location)

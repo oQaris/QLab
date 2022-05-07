@@ -1,6 +1,6 @@
 package io.deeplay.qlab.parser.models.input;
 
-import io.deeplay.qlab.parser.models.Unit;
+import io.deeplay.qlab.parser.models.UnitWithResult;
 
 import java.util.List;
 import java.util.Objects;
@@ -9,13 +9,13 @@ public class EnemyLocation {
     private final String locationName;
     private final int locationLevel;
     private final int maxPositionsQuantity;
-    private final List<Unit> opponentUnits;
+    private final List<UnitWithResult> opponentUnits;
 
-    public EnemyLocation(String locationName, int locationLevel, int maxPositionsQuantity, List<Unit> opponentUnits) {
+    public EnemyLocation(String locationName, int locationLevel, int maxPositionsQuantity, List<UnitWithResult> opponentUnitWithResults) {
         this.locationName = locationName;
         this.locationLevel = locationLevel;
         this.maxPositionsQuantity = maxPositionsQuantity;
-        this.opponentUnits = opponentUnits;
+        this.opponentUnits = opponentUnitWithResults;
     }
 
     public String getLocationName() {
@@ -30,7 +30,7 @@ public class EnemyLocation {
         return maxPositionsQuantity;
     }
 
-    public List<Unit> getOpponentUnits() {
+    public List<UnitWithResult> getOpponentUnits() {
         return opponentUnits;
     }
 

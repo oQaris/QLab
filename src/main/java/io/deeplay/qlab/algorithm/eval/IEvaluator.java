@@ -1,4 +1,4 @@
-package io.deeplay.qlab.algorithm;
+package io.deeplay.qlab.algorithm.eval;
 
 import io.deeplay.qlab.parser.models.output.UnitWithLocation;
 

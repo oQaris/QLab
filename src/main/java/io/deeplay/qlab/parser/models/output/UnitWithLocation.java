@@ -1,70 +1,38 @@
 package io.deeplay.qlab.parser.models.output;
 
+import io.deeplay.qlab.parser.models.Unit;
+import io.deeplay.qlab.parser.models.input.EnemyLocation;
+
 import java.util.Objects;
 
-public class UnitWithLocation {
-    private final String name;
-    private double sourceGoldCount;
-    private int locatePosition;
-    private String locationName;
+public class UnitWithLocation extends Unit {
+    private EnemyLocation location;
 
-    public UnitWithLocation(String name, double sourceGoldCount, int locatePosition, String locationName) {
+    public UnitWithLocation(String name, double sourceGoldCount, int locatePosition, EnemyLocation location) {
         this.name = name;
         this.sourceGoldCount = sourceGoldCount;
         this.locatePosition = locatePosition;
-        this.locationName = locationName;
+        this.location = location;
     }
 
-    public String getName() {
-        return name;
+    public EnemyLocation getLocation() {
+        return location;
     }
 
-    public double getSourceGoldCount() {
-        return sourceGoldCount;
-    }
-
-    public void setSourceGoldCount(double sourceGoldCount) {
-        this.sourceGoldCount = sourceGoldCount;
-    }
-
-    public int getLocatePosition() {
-        return locatePosition;
-    }
-
-    public void setLocatePosition(int locatePosition) {
-        this.locatePosition = locatePosition;
-    }
-
-    public String getLocationName() {
-        return locationName;
-    }
-
-    public void setLocationName(String locationName) {
-        this.locationName = locationName;
+    public void setLocation(EnemyLocation location) {
+        this.location = location;
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof UnitWithLocation that)) return false;
-        return Double.compare(that.sourceGoldCount, sourceGoldCount) == 0
-                && locatePosition == that.locatePosition
-                && Objects.equals(name, that.name)
-                && Objects.equals(locationName, that.locationName);
+        if (!super.equals(o)) return false;
+        return Objects.equals(location, that.location);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, sourceGoldCount, locatePosition, locationName);
-    }
-
-    @Override
-    public String toString() {
-        return "UnitWithLocation{" +
-                "name='" + name + '\'' +
-                ", sourceGoldCount=" + sourceGoldCount +
-                ", locatePosition=" + locatePosition +
-                ", locationName='" + locationName + '\'' +
-                '}';
+        return Objects.hash(super.hashCode(), location);
     }
 }
