@@ -10,10 +10,8 @@ public class UnitWithResult extends Unit {
     private int shield;
 
     public UnitWithResult(String name, double sourceGoldCount) {
-        this.name = name;
-        this.sourceGoldCount = sourceGoldCount;
+        super(name, sourceGoldCount, 0);
         this.goldProfit = 0.0;
-        this.locatePosition = 0;
         this.evasiveness = 0;
         this.aggression = 0;
         this.responseAggression = 0;
@@ -21,10 +19,8 @@ public class UnitWithResult extends Unit {
     }
 
     public UnitWithResult(String name, double sourceGoldCount, int locatePosition) {
-        this.name = name;
-        this.sourceGoldCount = sourceGoldCount;
+        super(name, sourceGoldCount, locatePosition);
         this.goldProfit = 0.0;
-        this.locatePosition = locatePosition;
         this.evasiveness = 0;
         this.aggression = 0;
         this.responseAggression = 0;
@@ -32,10 +28,8 @@ public class UnitWithResult extends Unit {
     }
 
     public UnitWithResult(String name, double sourceGoldCount, double goldProfit, int locatePosition, int evasiveness, int aggression, int responseAggression, int shield) {
-        this.name = name;
-        this.sourceGoldCount = sourceGoldCount;
+        super(name, sourceGoldCount, locatePosition);
         this.goldProfit = goldProfit;
-        this.locatePosition = locatePosition;
         this.evasiveness = evasiveness;
         this.aggression = aggression;
         this.responseAggression = responseAggression;

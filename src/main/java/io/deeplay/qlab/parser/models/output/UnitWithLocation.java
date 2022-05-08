@@ -9,9 +9,7 @@ public class UnitWithLocation extends Unit {
     private EnemyLocation location;
 
     public UnitWithLocation(String name, double sourceGoldCount, int locatePosition, EnemyLocation location) {
-        this.name = name;
-        this.sourceGoldCount = sourceGoldCount;
-        this.locatePosition = locatePosition;
+        super(name, sourceGoldCount, locatePosition);
         this.location = location;
     }
 
