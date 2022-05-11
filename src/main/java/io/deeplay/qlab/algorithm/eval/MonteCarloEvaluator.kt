@@ -48,8 +48,13 @@ class MonteCarloEvaluator(private val history: List<Round>) : IEvaluator {
                 //todo сделать не такой критичный отсев
                 round.locationName == location.locationName
                         && round.locationLevel == location.locationLevel
+
                         && round.opponentUnits.positions() == location.opponentUnits.positions()
-                        && units.positions() == round.ourUnits.positions()
+                        && round.ourUnits.positions() == units.positions()
+
+                        && equalsGolds(round.opponentUnits.srcGolds(), location.opponentUnits.srcGolds(), eps * 100)
+                        && equalsGolds(round.ourUnits.srcGolds(), units.srcGolds(), eps * 100)
+
                         && equalsStats(round.opponentUnits.toStats(), targetEnemyStats, eps)
                         && equalsStats(round.ourUnits.toStats(), targetOurStats, eps)
             }
@@ -58,6 +63,16 @@ class MonteCarloEvaluator(private val history: List<Round>) : IEvaluator {
 
             similarRounds = curRounds
             eps /= 2
+        }
+    }
+
+    private fun equalsGolds(historyGolds: List<Double>, targetGolds: List<Double>, eps: Double): Boolean {
+        if (historyGolds.size != targetGolds.size) return false
+        return historyGolds.permutations().any {
+            it.zip(targetGolds)
+                .all { (g1, g2) ->
+                    abs(g1 - g2) < eps
+                }
         }
     }
 
@@ -72,7 +87,9 @@ class MonteCarloEvaluator(private val history: List<Round>) : IEvaluator {
         }
     }
 
-    private fun Iterable<Unit>.positions() = map { it.locatePosition }.toSet()
+    private fun Iterable<Unit>.srcGolds() = map { it.sourceGoldCount }.toList()
+
+    private fun Iterable<Unit>.positions() = map { it.locatePosition }.toList()
 
     private fun Iterable<Unit>.toStats() = map { stats[it.name] ?: medianStat }
 }

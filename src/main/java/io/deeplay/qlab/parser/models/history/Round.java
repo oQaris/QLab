@@ -61,7 +61,7 @@ public class Round {
         if (!(o instanceof Round round)) return false;
         return locationLevel == round.locationLevel
                 && maxPositionsQuantity == round.maxPositionsQuantity
-                && Objects.equals(roundId, round.roundId)
+                //&& Objects.equals(roundId, round.roundId)
                 && Objects.equals(locationName, round.locationName)
                 && Objects.equals(opponentUnits, round.opponentUnits)
                 && Objects.equals(ourUnits, round.ourUnits);
@@ -69,6 +69,6 @@ public class Round {
 
     @Override
     public int hashCode() {
-        return Objects.hash(roundId, locationName, locationLevel, maxPositionsQuantity, opponentUnits, ourUnits);
+        return Objects.hash(/*roundId,*/ locationName, locationLevel, maxPositionsQuantity, opponentUnits, ourUnits);
     }
 }

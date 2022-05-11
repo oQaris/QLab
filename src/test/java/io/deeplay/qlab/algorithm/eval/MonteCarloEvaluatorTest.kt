@@ -30,7 +30,7 @@ internal class MonteCarloEvaluatorTest {
         val testData = Parser.parseRoundList(File("testData/filtered.json"))
 
         var error = 0.0
-        testData.forEach { round ->
+        testData.subList(10650, testData.size).forEach { round ->
             val evaluator = MonteCarloEvaluator(history - round)
 
             val actual = round.ourUnits.sumOf { it.goldProfit }
@@ -45,6 +45,23 @@ internal class MonteCarloEvaluatorTest {
             error += curError / testData.size
         }
         println("Средняя погрешность = $error")
+    }
+
+    @Test
+    fun eqRoundsDemo() {
+        val history = Parser.parseRoundList(File("testData/anonymized_data.json"))
+        println("all: ${history.size}")
+        val clearProfitRounds = history.toSet()
+        println("distinct: ${clearProfitRounds.size}")
+        clearProfitRounds.forEach { round ->
+            round.ourUnits.forEach {
+                it.aggression = 0
+            }
+            round.opponentUnits.forEach {
+                it.aggression = 0
+            }
+        }
+        println("without gold profit: ${clearProfitRounds.toSet().size}")
     }
 
     private fun Round.toUnitsWithLocation() = buildSet {
