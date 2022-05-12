@@ -1,7 +1,7 @@
 package io.deeplay.qlab.algorithm;
 
 import io.deeplay.qlab.algorithm.eval.IEvaluator;
-import io.deeplay.qlab.parser.models.UnitWithResult;
+import io.deeplay.qlab.parser.models.Unit;
 import io.deeplay.qlab.parser.models.input.EnemyLocation;
 import io.deeplay.qlab.parser.models.output.UnitWithLocation;
 
@@ -15,7 +15,7 @@ public class Placer {
         this.strategy = strategy;
     }
 
-    public Set<UnitWithLocation> findDisposition(Set<UnitWithResult> unitWithResults, Set<EnemyLocation> locations) {
-        return PlacerHelperKt.findBestArrangement(unitWithResults, locations, strategy);
+    public Set<UnitWithLocation> findDisposition(Set<Unit> units, Set<EnemyLocation> locations) {
+        return PlacerHelperKt.findBestArrangement(units, locations, strategy);
     }
 }

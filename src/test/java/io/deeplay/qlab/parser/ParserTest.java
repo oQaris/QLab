@@ -1,6 +1,7 @@
 package io.deeplay.qlab.parser;
 
 
+import io.deeplay.qlab.parser.models.Unit;
 import io.deeplay.qlab.parser.models.UnitWithResult;
 import io.deeplay.qlab.parser.models.history.Round;
 import io.deeplay.qlab.parser.models.input.EnemyLocation;
@@ -31,10 +32,10 @@ class ParserTest {
         String data = Files.readString(Path.of("testData/world.json"));
         World expected = new World("FunnyLand",
                 List.of(new EnemyLocation("Factoria15", 10, 6,
-                        List.of(new UnitWithResult("Иван Факов", 86.25, 2)))),
-                List.of(new UnitWithResult("РИНО КОТОНИЧ", 294.25),
-                        new UnitWithResult("ЭТЕЛЬСКА АДАЛЬРИСИЧ", 204.5),
-                        new UnitWithResult("МЕРСТЕН БРОНДРЕАКА", 119.75)));
+                        List.of(new Unit("Иван Факов", 86.25, 2)))),
+                List.of(new Unit("РИНО КОТОНИЧ", 294.25),
+                        new Unit("ЭТЕЛЬСКА АДАЛЬРИСИЧ", 204.5),
+                        new Unit("МЕРСТЕН БРОНДРЕАКА", 119.75)));
 
         assertEquals(expected, Parser.parseInput(data));
     }

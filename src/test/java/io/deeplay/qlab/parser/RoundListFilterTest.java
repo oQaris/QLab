@@ -9,6 +9,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RoundListFilterTest {
+
     @Test
     void filter_NonZeroSizedLocationsTest() {
         Round okay = new Round("45987fd3", "Factoria304", 10, 6,
@@ -18,7 +19,7 @@ public class RoundListFilterTest {
         );
         Round zeroSizedEmpty = new Round("f11c3f18", "Factoria770", 50, 0, List.of(), List.of());
         Round zeroSizedNonEmpty = new Round("f1151918", "Factoria771", 51, 0,
-                List.of(new UnitWithResult("ЛИАГОРД ОНГКЕЕЦ", 10)),
+                List.of(new UnitWithResult("ЛИАГОРД ОНГКЕЕЦ", 10, 0)),
                 List.of()
         );
 

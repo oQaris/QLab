@@ -9,15 +9,6 @@ public class UnitWithResult extends Unit {
     private int responseAggression;
     private int shield;
 
-    public UnitWithResult(String name, double sourceGoldCount) {
-        super(name, sourceGoldCount, 0);
-        this.goldProfit = 0.0;
-        this.evasiveness = 0;
-        this.aggression = 0;
-        this.responseAggression = 0;
-        this.shield = 0;
-    }
-
     public UnitWithResult(String name, double sourceGoldCount, int locatePosition) {
         super(name, sourceGoldCount, locatePosition);
         this.goldProfit = 0.0;

@@ -7,6 +7,12 @@ public class Unit {
     protected double sourceGoldCount;
     protected int locatePosition;
 
+    public Unit(String name, double sourceGoldCount) {
+        this.name = name;
+        this.sourceGoldCount = sourceGoldCount;
+        this.locatePosition = 0;
+    }
+
     public Unit(String name, double sourceGoldCount, int locatePosition) {
         this.name = name;
         this.sourceGoldCount = sourceGoldCount;

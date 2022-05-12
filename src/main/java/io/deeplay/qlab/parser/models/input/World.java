@@ -1,6 +1,6 @@
 package io.deeplay.qlab.parser.models.input;
 
-import io.deeplay.qlab.parser.models.UnitWithResult;
+import io.deeplay.qlab.parser.models.Unit;
 
 import java.util.List;
 import java.util.Objects;
@@ -8,12 +8,12 @@ import java.util.Objects;
 public class World {
     private final String worldName;
     private final List<EnemyLocation> locations;
-    private final List<UnitWithResult> ourUnits;
+    private final List<Unit> ourUnits;
 
-    public World(String worldName, List<EnemyLocation> locations, List<UnitWithResult> ourUnitWithResults) {
+    public World(String worldName, List<EnemyLocation> locations, List<Unit> ourUnits) {
         this.worldName = worldName;
         this.locations = locations;
-        this.ourUnits = ourUnitWithResults;
+        this.ourUnits = ourUnits;
     }
 
     public String getWorldName() {
@@ -24,7 +24,7 @@ public class World {
         return locations;
     }
 
-    public List<UnitWithResult> getOurUnits() {
+    public List<Unit> getOurUnits() {
         return ourUnits;
     }
 

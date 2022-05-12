@@ -6,6 +6,7 @@ import io.deeplay.qlab.parser.models.history.Round
 import io.deeplay.qlab.parser.models.input.EnemyLocation
 import io.deeplay.qlab.parser.models.output.UnitWithLocation
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.File
 import kotlin.math.abs
@@ -25,6 +26,7 @@ internal class MonteCarloEvaluatorTest {
     }
 
     @Test
+    @Disabled
     fun meanErrorDemo() {
         val history = Parser.parseRoundList(File("testData/anonymized_data.json"))
         val testData = Parser.parseRoundList(File("testData/filtered.json"))
@@ -48,6 +50,7 @@ internal class MonteCarloEvaluatorTest {
     }
 
     @Test
+    @Disabled
     fun eqRoundsDemo() {
         val history = Parser.parseRoundList(File("testData/anonymized_data.json"))
         println("all: ${history.size}")
@@ -70,4 +73,17 @@ internal class MonteCarloEvaluatorTest {
             add(UnitWithLocation(unit.name, unit.sourceGoldCount, unit.locatePosition, location))
         }
     }.toMutableSet()
+
+
+    @Test
+    @Disabled
+    fun stackDemo() {
+        val history = Parser.parseRoundList(File("testData/anonymized_data.json"))
+        history.forEach { round ->
+            val allUnits = round.opponentUnits + round.ourUnits
+            val maxPos = allUnits.maxOf { it.locatePosition }
+            if (maxPos != allUnits.size - 1)
+                println(round.roundId)
+        }
+    }
 }
