@@ -1,6 +1,7 @@
 package io.deeplay.qlab.algorithm;
 
 import io.deeplay.qlab.algorithm.eval.IEvaluator;
+import io.deeplay.qlab.algorithm.placer.Placer;
 import io.deeplay.qlab.parser.models.Unit;
 import io.deeplay.qlab.parser.models.input.EnemyLocation;
 import io.deeplay.qlab.parser.models.output.UnitWithLocation;

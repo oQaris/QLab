@@ -1,4 +1,4 @@
-package io.deeplay.qlab.algorithm;
+package io.deeplay.qlab.algorithm.placer;
 
 import io.deeplay.qlab.algorithm.eval.IEvaluator;
 import io.deeplay.qlab.parser.models.Unit;

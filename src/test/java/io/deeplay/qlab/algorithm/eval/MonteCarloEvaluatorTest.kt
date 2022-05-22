@@ -29,7 +29,7 @@ internal class MonteCarloEvaluatorTest {
     @Disabled
     fun meanErrorDemo() {
         val history = Parser.parseRoundList(File("testData/anonymized_data.json"))
-        val testData = Parser.parseRoundList(File("testData/filtered.json"))
+        val testData = Parser.parseRoundList(File("testData/filtered1to1.json"))
 
         var error = 0.0
         testData.subList(10650, testData.size).forEach { round ->

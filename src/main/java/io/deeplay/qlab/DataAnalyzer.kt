@@ -5,7 +5,8 @@ import io.deeplay.qlab.parser.models.history.Round
 import java.io.File
 
 fun unitsProfiles() {
-    val data: List<Round> = Parser.parseRoundList(File("C:\\Users\\oQaris\\Downloads\\Telegram Desktop\\filtered.json"))
+    val data: List<Round> =
+        Parser.parseRoundList(File("C:\\Users\\oQaris\\Downloads\\Telegram Desktop\\filtered1to1.json"))
     val unitStat = data.flatMap { it.ourUnits + it.opponentUnits }
         .groupBy { it.name }
 

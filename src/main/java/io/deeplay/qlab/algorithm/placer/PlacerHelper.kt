@@ -1,4 +1,4 @@
-package io.deeplay.qlab.algorithm
+package io.deeplay.qlab.algorithm.placer
 
 import com.github.shiguruikai.combinatoricskt.combinations
 import com.github.shiguruikai.combinatoricskt.permutations
