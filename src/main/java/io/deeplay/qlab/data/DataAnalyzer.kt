@@ -1,8 +1,20 @@
-package io.deeplay.qlab
+package io.deeplay.qlab.data
 
 import io.deeplay.qlab.parser.Parser
+import io.deeplay.qlab.parser.RoundListFilter
 import io.deeplay.qlab.parser.models.history.Round
 import java.io.File
+
+fun main() {
+    val history = Parser.parseRoundList(File("testData/anonymized_data.json"))
+        .run { RoundListFilter.filter(this) }
+
+    val lvls = history.map { it.locationLevel }.toSet().sorted()
+    val locs = history.groupingBy { it.locationLevel }
+        .eachCount().entries
+        .sortedBy { it.value }
+    println(locs.joinToString("\n"))
+}
 
 fun unitsProfiles() {
     val data: List<Round> =

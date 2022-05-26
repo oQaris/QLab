@@ -138,6 +138,17 @@
             <version>5.8.2</version>
             <scope>test</scope>
         </dependency>
+        <!--ML-->
+        <dependency>
+            <groupId>com.microsoft.onnxruntime</groupId>
+            <artifactId>onnxruntime</artifactId>
+            <version>1.11.0</version>
+        </dependency>
+        <dependency>
+            <groupId>ai.catboost</groupId>
+            <artifactId>catboost-prediction</artifactId>
+            <version>1.0.4</version>
+        </dependency>
         <!--Kotlin-->
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
