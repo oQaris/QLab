@@ -19,6 +19,13 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
     <build>
         <plugins>
             <plugin>
@@ -148,6 +155,11 @@
             <groupId>ai.catboost</groupId>
             <artifactId>catboost-prediction</artifactId>
             <version>1.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.holgerbrandl</groupId>
+            <artifactId>krangl</artifactId>
+            <version>0.17.3</version>
         </dependency>
         <!--Kotlin-->
         <dependency>
