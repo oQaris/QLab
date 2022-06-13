@@ -13,6 +13,7 @@
 /.idea
 /target
 /testData/anonymized_data.json
+/trainData
 
 # Package Files #
 *.jar
