@@ -31,7 +31,6 @@ fun minimaxNormaContext(data: List<FloatArray>): Pair<FloatArray, FloatArray> {
     }
 }
 
-
 fun zNormaContext(data: List<FloatArray>): Pair<FloatArray, FloatArray> {
     return buildList {
         for (nCol in data.first().indices) {
