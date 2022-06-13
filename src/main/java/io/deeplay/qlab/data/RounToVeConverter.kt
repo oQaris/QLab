@@ -125,7 +125,11 @@ private fun saveProfiles(profiles: Map<String, FloatArray>, fileName: String) {
 }
 
 private fun saveRounds(rounds: List<FloatArray>, fileName: String) {
-    File(fileName).bufferedWriter().use { writer ->
+    val file = File(fileName)
+
+    file.parentFile.mkdirs()
+
+    file.bufferedWriter().use { writer ->
         val spaceForUnits = rounds.first().size - 11
         require(spaceForUnits % 10 == 0)
 
