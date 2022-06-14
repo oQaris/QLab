@@ -17,10 +17,7 @@ public class EvolutionAlgorithm {
     private final int maxUnitAtLoc;
     private final int countLoc;
     private final ExecutorService service;
-    private double costPopulation = 1;              // Переменная общая для класса, для удобства (оценка приспособленности
-                                                    // популяции
     private Individual optInd;
-    private double optCost = 0;
 
     private final int tournamentS;
     private final Random random = new Random();
@@ -58,7 +55,7 @@ public class EvolutionAlgorithm {
         return k - 1;
     }
 
-    public EvolutionAlgorithm(int lambda, int n, int tournamentS, double chi, int maxUnitAtLoc,
+    public EvolutionAlgorithm(int lambda, int tournamentS, double chi, int maxUnitAtLoc,
                               int countLoc, Function<List <List<String>>, Double> func) {
         this.lambda = lambda;
         this.maxUnitAtLoc = maxUnitAtLoc;
@@ -156,7 +153,7 @@ public class EvolutionAlgorithm {
         return tournamentSelectionAndMutation(population);
     }
 
-    public List<List<String>> start(Integer iter, List<String> names) {
+    public List<List<String>> start(List<String> names) {
         // Строим случайным образом генотип
         List<Individual> population = new ArrayList<>();
 
@@ -171,6 +168,7 @@ public class EvolutionAlgorithm {
             }
             int countNotFullLoc = countLoc;
             for (String name : names) {
+                //TODO: случайно НЕ берет юнита
                 if (randPop.size() != 0) {
                     List<String> buf = randPop.get(random.nextInt(countNotFullLoc));
                     if (buf.size() == countLoc) {
@@ -190,7 +188,13 @@ public class EvolutionAlgorithm {
         }
 
         // Строим новые популяции
-        for(int i = 0; i < iter; i++) {
+        long startTime = System.currentTimeMillis();
+        long sumTime = 0;
+        for(long curTime = 0, i = 0;
+                        curTime + sumTime/(double)i < 5. ;
+                        curTime = System.currentTimeMillis() - startTime, i++,
+                        sumTime += curTime)
+        {
             population = selectionAndMutation(population);
         }
         return optInd.locations;
