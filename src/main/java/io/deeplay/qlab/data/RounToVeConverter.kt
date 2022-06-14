@@ -13,44 +13,49 @@ fun main() {
 
     println("Генерация профилей...")
     val profiles = genProfiles(history)
+    val levels = history.map { it.locationLevel }.distinct().sorted()
+    require(levels.size == 10)
 
     // Можно настроить выбор раундов
-    val rounds = history.filter { it.ourUnits.size == 1 && it.opponentUnits.size == 2 }
+    val filter = listOf(1 to 1)
 
-    println("Стандартизация данных...")
-    var roundsStd = standardizeRounds(rounds, profiles)
+    filter.forEach { (our, opp) ->
+        println("\nНаших: $our, Противников: $opp")
+        val rounds = history.filter { it.ourUnits.size == our && it.opponentUnits.size == opp }
 
-    val normContext = zNormaContext(roundsStd)
-    println("Контекст для нормализации:")
-    println(normContext.first.joinToString { String.format(Locale.ENGLISH, "%.6f", it) })
-    println(normContext.second.joinToString { String.format(Locale.ENGLISH, "%.6f", it) })
+        println("Стандартизация данных...")
+        var roundsStd = standardizeRounds(rounds, levels, profiles)
 
-    println("Нормализация данных...")
-    roundsStd = normalizeStd(roundsStd) { normContext }
+        val normContext = genZNormContext(roundsStd)
+        println("Контекст для нормализации:")
+        println(normContext.first.joinToString { String.format(Locale.ENGLISH, "%.8f", it) })
+        println(normContext.second.joinToString { String.format(Locale.ENGLISH, "%.8f", it) })
 
-    println("Сохранение в файл...")
-    saveRounds(roundsStd, "testData/rnds1vs2z.csv")
-    println("Сохранено ${roundsStd.size} ${roundsStd.first().size}-мерных векторов")
+        println("Нормализация данных...")
+        roundsStd = normalizeStd(roundsStd) { normContext }
+
+        println("Сохранение в файл...")
+        saveRounds(roundsStd, "trainData/11std.csv")
+        println("Сохранено ${roundsStd.size} ${roundsStd.first().size}-мерных векторов")
+    }
 }
 
 private fun standardizeRounds(
     history: List<Round>,
+    levels: List<Int>,
     profiles: Map<String, FloatArray>
 ): List<FloatArray> {
 
     val sizeDataOneUnit = // длина профиля + дополнительные данные
         profiles.entries.first().value.size + 3
 
-    val levels = history.map { it.locationLevel }.distinct().sorted()
-    require(levels.size == 10)
-    val maxPosition = history.maxOf { it.ourUnits.size + it.ourUnits.size }
-
-    val roundsNormalize = mutableListOf<FloatArray>()
+    val maxPosition = history.maxOf { it.ourUnits.size + it.opponentUnits.size }
+    val roundsStandardized = mutableListOf<FloatArray>()
 
     history.forEach { round ->
-        val curRoundNorma = mutableListOf<Float>()
-        // One-Hot encoding
-        curRoundNorma.addAll(
+        val curRoundNorm = mutableListOf<Float>()
+        // One-Hot encoding уровня
+        curRoundNorm.addAll(
             FloatArray(levels.size)
             { if (levels[it] == round.locationLevel) 1f else 0f }.toList()
         )
@@ -74,20 +79,20 @@ private fun standardizeRounds(
                 }
             }
         }.flatten()
-        curRoundNorma.addAll(roundProfiles)
+        curRoundNorm.addAll(roundProfiles)
         // Голд профит
-        curRoundNorma.add((round.ourUnits.sumOf { it.goldProfit }).toFloat())
+        curRoundNorm.add((round.ourUnits.sumOf { it.goldProfit }).toFloat())
 
-        roundsNormalize.add(curRoundNorma.toFloatArray())
+        roundsStandardized.add(curRoundNorm.toFloatArray())
     }
-    return roundsNormalize
+    return roundsStandardized
 }
 
 private fun normalizeStd(
     data: List<FloatArray>,
-    norma: (List<FloatArray>) -> Pair<FloatArray, FloatArray> = ::zNormaContext
+    normContext: (List<FloatArray>) -> Pair<FloatArray, FloatArray> = ::genZNormContext
 ): List<FloatArray> {
-    return data.map { it.applyNormaByRow(norma(data)).toFloatArray() }
+    return data.map { it.applyNormByRow(normContext(data)).toFloatArray() }
 }
 
 private fun genProfiles(history: List<Round>): Map<String, FloatArray> {
@@ -106,33 +111,35 @@ private fun genProfiles(history: List<Round>): Map<String, FloatArray> {
         }
 }
 
-private fun saveProfiles(profiles: Map<String, FloatArray>, fileName: String = "testData/profiles.csv") {
+private fun saveProfiles(profiles: Map<String, FloatArray>, fileName: String) {
     File(fileName).bufferedWriter().use { writer ->
-        writer.write("name,p_e,p_a,p_r,p_s,p_gc,p_gp,gc")
+        writer.write("name,p_e,p_a,p_r,p_s,p_gc,p_gp,vr")
         writer.newLine()
-        profiles.entries.forEach { (name, row) ->
+        profiles.forEach { (name, row) ->
             writer.write("$name,")
             writer.write(row.joinToString(","))
             writer.newLine()
         }
-        writer.flush()
     }
 }
 
-private fun saveRounds(rounds: List<FloatArray>, fileName: String = "testData/rounds_normalize.csv") {
-    File(fileName).bufferedWriter().use { writer ->
-        val spaceForUnits = rounds.first().size - 11
-        require(spaceForUnits % 10 == 0)
-        writer.write("lvl1,lvl2,lvl3,lvl4,lvl5,lvl6,lvl7,lvl8,lvl9,lvl10,")
-        repeat(spaceForUnits / 10) {
-            writer.write("p${it}_e,p${it}_a,p${it}_r,p${it}_s,p${it}_gc,p${it}_gp,vr${it},gc${it},p${it}_opp,p${it}_our,")
-        }
-        writer.write("our_gp")
-        writer.newLine()
-        rounds.forEach { row ->
-            writer.write(row.joinToString(",") { String.format(Locale.ENGLISH, "%.8f", it); })
+private fun saveRounds(rounds: List<FloatArray>, fileName: String) {
+    File(fileName)
+        .also { it.parentFile.mkdirs() }
+        .bufferedWriter().use { writer ->
+            val spaceForUnits = rounds.first().size - 11
+            require(spaceForUnits % 10 == 0)
+
+            writer.write("lvl1,lvl2,lvl3,lvl4,lvl5,lvl6,lvl7,lvl8,lvl9,lvl10,")
+            repeat(spaceForUnits / 10) {
+                writer.write("p${it}_e,p${it}_a,p${it}_r,p${it}_s,p${it}_gc,p${it}_gp,vr${it},gc${it},p${it}_opp,p${it}_our,")
+            }
+            writer.write("our_gp")
             writer.newLine()
-        }
-        writer.flush()
+
+            rounds.forEach { row ->
+                writer.write(row.joinToString(",") { String.format(Locale.ENGLISH, "%.8f", it) })
+                writer.newLine()
+            }
     }
 }

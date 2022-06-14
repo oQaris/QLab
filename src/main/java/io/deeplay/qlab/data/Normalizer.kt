@@ -13,13 +13,13 @@ inline fun <T> Collection<T>.standardDeviation(selector: (T) -> Float): Float {
     }).toFloat()
 }
 
-fun FloatArray.applyNormaByRow(context: Pair<FloatArray, FloatArray>): List<Float> {
+fun FloatArray.applyNormByRow(context: Pair<FloatArray, FloatArray>): List<Float> {
     return this.zip(context.first.zip(context.second))
         .map { (it.first - it.second.first) / it.second.second }
 }
 
 
-fun minimaxNormaContext(data: List<FloatArray>): Pair<FloatArray, FloatArray> {
+fun genMinimaxNormContext(data: List<FloatArray>): Pair<FloatArray, FloatArray> {
     return buildList {
         for (nCol in data.first().indices) {
             val column = data.map { it[nCol] }
@@ -31,14 +31,13 @@ fun minimaxNormaContext(data: List<FloatArray>): Pair<FloatArray, FloatArray> {
     }
 }
 
-
-fun zNormaContext(data: List<FloatArray>): Pair<FloatArray, FloatArray> {
+fun genZNormContext(data: List<FloatArray>): Pair<FloatArray, FloatArray> {
     return buildList {
         for (nCol in data.first().indices) {
             val column = data.map { it[nCol] }
             val (max, min) = column.maxOf { it } to column.minOf { it }
             val contextCol = // не трогаем вероятности и one hot
-                if (max <= 1 && min >= -1) emptyNormalizationContext()
+                if (max <= 1 && min >= -1) genEmptyNormalizationContext()
                 else column.contextForNormaZ()
             add(contextCol)
         }
@@ -47,7 +46,7 @@ fun zNormaContext(data: List<FloatArray>): Pair<FloatArray, FloatArray> {
     }
 }
 
-fun emptyNormalizationContext() = 0f to 1f
+fun genEmptyNormalizationContext() = 0f to 1f
 
 fun Collection<Float>.contextForNormaZ(): Pair<Float, Float> {
     val mean = this.mean { it }
