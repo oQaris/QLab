@@ -26,13 +26,13 @@ fun main() {
         println("Стандартизация данных...")
         var roundsStd = standardizeRounds(rounds, levels, profiles)
 
-        val normContext = zNormaContext(roundsStd)
+        val normContext = genZNormContext(roundsStd)
         println("Контекст для нормализации:")
         println(normContext.first.joinToString { String.format(Locale.ENGLISH, "%.8f", it) })
         println(normContext.second.joinToString { String.format(Locale.ENGLISH, "%.8f", it) })
 
         println("Нормализация данных...")
-        //roundsStd = normalizeStd(roundsStd) { normContext }
+        roundsStd = normalizeStd(roundsStd) { normContext }
 
         println("Сохранение в файл...")
         saveRounds(roundsStd, "trainData/11std.csv")
@@ -50,12 +50,12 @@ private fun standardizeRounds(
         profiles.entries.first().value.size + 3
 
     val maxPosition = history.maxOf { it.ourUnits.size + it.opponentUnits.size }
-    val roundsNormalize = mutableListOf<FloatArray>()
+    val roundsStandardized = mutableListOf<FloatArray>()
 
     history.forEach { round ->
-        val curRoundNorma = mutableListOf<Float>()
+        val curRoundNorm = mutableListOf<Float>()
         // One-Hot encoding уровня
-        curRoundNorma.addAll(
+        curRoundNorm.addAll(
             FloatArray(levels.size)
             { if (levels[it] == round.locationLevel) 1f else 0f }.toList()
         )
@@ -79,20 +79,20 @@ private fun standardizeRounds(
                 }
             }
         }.flatten()
-        curRoundNorma.addAll(roundProfiles)
+        curRoundNorm.addAll(roundProfiles)
         // Голд профит
-        curRoundNorma.add((round.ourUnits.sumOf { it.goldProfit }).toFloat())
+        curRoundNorm.add((round.ourUnits.sumOf { it.goldProfit }).toFloat())
 
-        roundsNormalize.add(curRoundNorma.toFloatArray())
+        roundsStandardized.add(curRoundNorm.toFloatArray())
     }
-    return roundsNormalize
+    return roundsStandardized
 }
 
 private fun normalizeStd(
     data: List<FloatArray>,
-    norma: (List<FloatArray>) -> Pair<FloatArray, FloatArray> = ::zNormaContext
+    normContext: (List<FloatArray>) -> Pair<FloatArray, FloatArray> = ::genZNormContext
 ): List<FloatArray> {
-    return data.map { it.applyNormaByRow(norma(data)).toFloatArray() }
+    return data.map { it.applyNormByRow(normContext(data)).toFloatArray() }
 }
 
 private fun genProfiles(history: List<Round>): Map<String, FloatArray> {
@@ -120,26 +120,26 @@ private fun saveProfiles(profiles: Map<String, FloatArray>, fileName: String) {
             writer.write(row.joinToString(","))
             writer.newLine()
         }
-        writer.flush()
     }
 }
 
 private fun saveRounds(rounds: List<FloatArray>, fileName: String) {
-    File(fileName).bufferedWriter().use { writer ->
-        val spaceForUnits = rounds.first().size - 11
-        require(spaceForUnits % 10 == 0)
+    File(fileName)
+        .also { it.parentFile.mkdirs() }
+        .bufferedWriter().use { writer ->
+            val spaceForUnits = rounds.first().size - 11
+            require(spaceForUnits % 10 == 0)
 
-        writer.write("lvl1,lvl2,lvl3,lvl4,lvl5,lvl6,lvl7,lvl8,lvl9,lvl10,")
-        repeat(spaceForUnits / 10) {
-            writer.write("p${it}_e,p${it}_a,p${it}_r,p${it}_s,p${it}_gc,p${it}_gp,vr${it},gc${it},p${it}_opp,p${it}_our,")
-        }
-        writer.write("our_gp")
-        writer.newLine()
-
-        rounds.forEach { row ->
-            writer.write(row.joinToString(",") { String.format(Locale.ENGLISH, "%.8f", it) })
+            writer.write("lvl1,lvl2,lvl3,lvl4,lvl5,lvl6,lvl7,lvl8,lvl9,lvl10,")
+            repeat(spaceForUnits / 10) {
+                writer.write("p${it}_e,p${it}_a,p${it}_r,p${it}_s,p${it}_gc,p${it}_gp,vr${it},gc${it},p${it}_opp,p${it}_our,")
+            }
+            writer.write("our_gp")
             writer.newLine()
-        }
-        writer.flush()
+
+            rounds.forEach { row ->
+                writer.write(row.joinToString(",") { String.format(Locale.ENGLISH, "%.8f", it) })
+                writer.newLine()
+            }
     }
 }

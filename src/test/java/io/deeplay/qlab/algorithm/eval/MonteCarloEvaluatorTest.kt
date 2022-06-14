@@ -6,6 +6,7 @@ import io.deeplay.qlab.parser.models.history.Round
 import io.deeplay.qlab.parser.models.input.EnemyLocation
 import io.deeplay.qlab.parser.models.output.UnitWithLocation
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import java.io.File
@@ -15,7 +16,11 @@ internal class MonteCarloEvaluatorTest {
 
     @Test
     fun evaluateGoldProfit1Test() {
-        val history: List<Round> = Parser.parseRoundList(File("testData/anonymized_data.json"))
+        val dataFile = File("testData/anonymized_data.json")
+
+        assumeTrue(dataFile.exists(), "Data file not found")
+
+        val history: List<Round> = Parser.parseRoundList(dataFile)
         val evaluator = MonteCarloEvaluator(history)
 
         // данные из раунда 5c31e7d2-1884-47b6-9c62-a53ee9d4ad63
