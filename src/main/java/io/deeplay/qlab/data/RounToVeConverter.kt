@@ -2,6 +2,7 @@ package io.deeplay.qlab.data
 
 import io.deeplay.qlab.parser.Parser
 import io.deeplay.qlab.parser.RoundListFilter
+import io.deeplay.qlab.parser.models.UnitWithResult
 import io.deeplay.qlab.parser.models.history.Round
 import java.io.File
 import java.util.*
@@ -10,11 +11,13 @@ fun main() {
     println("Парсинг...")
     val history = Parser.parseRoundList(File("testData/anonymized_data.json"))
         .run { RoundListFilter.filter(this) }
+        .run { filterRoundsWithFreqUnits(this) }
 
     println("Генерация профилей...")
     val profiles = genProfiles(history)
     val levels = history.map { it.locationLevel }.distinct().sorted()
-    require(levels.size == 10)
+    println(levels)
+//    require(levels.size == 10)
 
     // Можно настроить выбор раундов
     val filter = listOf(1 to 1)
@@ -40,10 +43,25 @@ fun main() {
     }
 }
 
+
+private fun filterRoundsWithFreqUnits(history: List<Round>): List<Round> {
+    val unitAppearances = mutableMapOf<UnitWithResult, Int>()
+    history.forEach {
+        (it.ourUnits + it.opponentUnits)
+            .forEach {
+                unitAppearances.merge(it, 1) { old, one -> old + one }
+            }
+    }
+
+    val frequentUnits = unitAppearances.filter { it.value > 5 }.keys
+
+    return history.filter { frequentUnits.containsAll(it.ourUnits + it.opponentUnits) }
+}
+
 private fun standardizeRounds(
     history: List<Round>,
     levels: List<Int>,
-    profiles: Map<String, FloatArray>
+    profiles: Map<Pair<String, Int>, FloatArray>
 ): List<FloatArray> {
 
     val sizeDataOneUnit = // длина профиля + дополнительные данные
@@ -65,7 +83,7 @@ private fun standardizeRounds(
                 repeat(maxPosition) { pos ->
                     val unit = units.firstOrNull { it.locatePosition == pos }
                     if (unit != null) {
-                        val rawProfile = profiles[unit.name]!!
+                        val rawProfile = profiles[unit.name to unit.locatePosition]!!
                         add(
                             rawProfile.toList()
                                 // добавляем в конец sourceGold в раунде
@@ -95,17 +113,17 @@ private fun normalizeStd(
     return data.map { it.applyNormByRow(normContext(data)).toFloatArray() }
 }
 
-private fun genProfiles(history: List<Round>): Map<String, FloatArray> {
+private fun genProfiles(history: List<Round>): Map<Pair<String, Int>, FloatArray> {
     return history.flatMap { it.ourUnits + it.opponentUnits }
-        .groupBy { it.name }
+        .groupBy { it.name to it.locatePosition }
         .mapValues { (_, units) ->
             listOf(
-                units.mean { it.evasiveness.toFloat() },
-                units.mean { it.aggression.toFloat() },
-                units.mean { it.responseAggression.toFloat() },
-                units.mean { it.shield.toFloat() },
-                units.mean { it.sourceGoldCount.toFloat() },
-                units.mean { it.goldProfit.toFloat() },
+//                units.mean { it.evasiveness.toFloat() },
+//                units.mean { it.aggression.toFloat() },
+//                units.mean { it.responseAggression.toFloat() },
+//                units.mean { it.shield.toFloat() },
+//                units.mean { it.sourceGoldCount.toFloat() },
+//                units.mean { it.goldProfit.toFloat() },
                 units.mean { if (it.goldProfit > 0) 1f else 0f }
             ).toFloatArray()
         }
@@ -127,12 +145,8 @@ private fun saveRounds(rounds: List<FloatArray>, fileName: String) {
     File(fileName)
         .also { it.parentFile.mkdirs() }
         .bufferedWriter().use { writer ->
-            val spaceForUnits = rounds.first().size - 11
-            require(spaceForUnits % 10 == 0)
-
-            writer.write("lvl1,lvl2,lvl3,lvl4,lvl5,lvl6,lvl7,lvl8,lvl9,lvl10,")
-            repeat(spaceForUnits / 10) {
-                writer.write("p${it}_e,p${it}_a,p${it}_r,p${it}_s,p${it}_gc,p${it}_gp,vr${it},gc${it},p${it}_opp,p${it}_our,")
+            repeat(rounds.first().size - 1) {
+                writer.write("p${it},")
             }
             writer.write("our_gp")
             writer.newLine()
@@ -141,5 +155,6 @@ private fun saveRounds(rounds: List<FloatArray>, fileName: String) {
                 writer.write(row.joinToString(",") { String.format(Locale.ENGLISH, "%.8f", it) })
                 writer.newLine()
             }
-    }
+        }
 }
+
