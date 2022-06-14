@@ -28,7 +28,10 @@ public class EvolutionAlgorithm {
         public double cost;
 
         public Individual(List <List<String>> locations, List <String> emptyLoc, double cost) {
-            this.locations = new ArrayList<>(locations);
+            this.locations = new ArrayList<>();
+            for (List<String> loc: locations) {
+                this.locations.add(new ArrayList<>(loc));
+            }
             this.emptyLoc = emptyLoc;
             this.cost = cost;
         }
@@ -163,6 +166,7 @@ public class EvolutionAlgorithm {
         for (int i = 0; i < lambda; i++) {
             randPop.clear();
             randPopBuf.clear();
+            emptyLoc.clear();
             for (int j = 0; j < countLoc; j++) {
                 randPop.add(new ArrayList<>());
             }
@@ -184,14 +188,18 @@ public class EvolutionAlgorithm {
                 }
             }
             randPop.addAll(randPopBuf);
-            population.add(new Individual(randPop, emptyLoc, func.apply(randPop)));
+            Individual ind = new Individual(randPop, emptyLoc, func.apply(randPop));
+            if (optInd == null || ind.cost > optInd.cost) {
+                optInd = ind;
+            }
+            population.add(ind);
         }
 
         // Строим новые популяции
         long startTime = System.currentTimeMillis();
         long sumTime = 0;
-        for(long curTime = 0, i = 0;
-                        curTime + sumTime/(double)i < 5. ;
+        for(long curTime = 0, i = 1;
+                        curTime + sumTime/(double)i < 5000. ;
                         curTime = System.currentTimeMillis() - startTime, i++,
                         sumTime += curTime)
         {

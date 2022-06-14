@@ -17,6 +17,6 @@ class EvolutionAlgorithmTest {
                 "A", "B", "C", "D", "E", "F", "G", "H", "K", "L"
         }).collect(Collectors.toList());
         List<List<String>> result = ea.start(list);
-        System.out.println();
+        System.out.println("result = " + Functions.randFunction.apply(result));
     }
 }
