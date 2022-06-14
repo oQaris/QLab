@@ -6,6 +6,14 @@ import kotlin.math.sqrt
 inline fun <T> Collection<T>.mean(selector: (T) -> Float) =
     this.sumOf { selector.invoke(it).toDouble() / this.size }.toFloat()
 
+inline fun <T> Collection<T>.median(selector: (T) -> Float): Float {
+    if (this.isEmpty()) return 0f
+    val sorted = this.map(selector).sorted()
+    val n = this.size
+    return if (n % 2 == 1) sorted[(n - 1) / 2]
+    else (sorted[n / 2 - 1] + sorted[n / 2]) / 2
+}
+
 inline fun <T> Collection<T>.standardDeviation(selector: (T) -> Float): Float {
     val mean = this.mean(selector)
     return sqrt(this.sumOf {
