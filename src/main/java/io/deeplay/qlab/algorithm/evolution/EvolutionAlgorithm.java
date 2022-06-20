@@ -1,38 +1,74 @@
 package io.deeplay.qlab.algorithm.evolution;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Random;
+import io.deeplay.qlab.algorithm.eval.IEvaluator;
+import io.deeplay.qlab.parser.models.Unit;
+import io.deeplay.qlab.parser.models.input.EnemyLocation;
+import io.deeplay.qlab.parser.models.output.UnitWithLocation;
+
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class EvolutionAlgorithm {
     private final int lambda;                       // Размер популяции
-    private final Function<List<List<String>>, Double> func;    // Функция приспособленности
+    private final IEvaluator func;    // Функция приспособленности
     private final double chi;                       // Вероятность мутации
     private final int maxUnitAtLoc;
     private final int countLoc;
+    private final List<EnemyLocation> locations;
     private final ExecutorService service;
+    private Individual optInd;
+
     private final int tournamentS;
     private final Random random = new Random();
-    private double costPopulation = 1;              // Переменная общая для класса, для удобства (оценка приспособленности
-    // популяции
-    private Individual optInd;
-    private double optCost = 0;
 
-    public EvolutionAlgorithm(int lambda, int n, int tournamentS, double chi, int maxUnitAtLoc,
-                              int countLoc, Function<List<List<String>>, Double> func) {
-        this.lambda = lambda;
-        this.maxUnitAtLoc = maxUnitAtLoc;
-        this.countLoc = countLoc;
-        this.func = func;
-        this.chi = chi;
-        service = Executors.newFixedThreadPool(8);
-        this.tournamentS = tournamentS;
+    private static class Individual {
+        public List <List<Unit>> locations;
+        public List <Unit> emptyLoc;
+        public double cost;
+
+        public Individual(List <List<Unit>> locations, List <Unit> emptyLoc, double cost) {
+            this.locations = new ArrayList<>();
+            for (List<Unit> loc: locations) {
+                this.locations.add(new ArrayList<>(loc));
+            }
+            this.emptyLoc = new ArrayList<>(emptyLoc);
+            this.cost = cost;
+        }
+
+        public Individual(Individual ind) {
+            this(ind.locations, ind.emptyLoc, ind.cost);
+        }
+
+        public void updateCost(double cost) {
+            this.cost = cost;
+        }
+    }
+
+    private double getCost(Individual individual) {
+        Set<UnitWithLocation> set = new HashSet<>();
+        int k = 0;
+        for (List<Unit> item: individual.locations) {
+            int i = 0;
+            EnemyLocation loc = locations.get(k);
+            Set<Integer> index = loc.getOpponentUnits().stream().map(Unit::getLocatePosition)
+                    .collect(Collectors.toCollection(TreeSet::new));    // позиции врагов
+            for (Unit unit: item) {
+                while (index.contains(i)) { i++; } // пропускаем позиции врагов
+
+                if (i >= maxUnitAtLoc) {
+                    break;
+                }
+
+                set.add(new UnitWithLocation(unit.getName(), unit.getSourceGoldCount(), i, loc));
+                i++;
+            }
+            k++;
+        }
+        return func.evaluateGoldProfit(set);
     }
 
     private static int getPoisson(double lambda) {
@@ -48,24 +84,67 @@ public class EvolutionAlgorithm {
         return k - 1;
     }
 
+    private Set<UnitWithLocation> placeUnit(Individual ind) {
+        Set<UnitWithLocation> set = new HashSet<>();
+        int k = 0;
+        for (List<Unit> item: ind.locations) {
+            EnemyLocation loc = locations.get(k);
+            Set<Integer> index = loc.getOpponentUnits().stream().map(Unit::getLocatePosition)
+                    .collect(Collectors.toCollection(TreeSet::new));    // позиции врагов
+
+            int i = 0;
+            for (Unit unit: item) {
+                while (index.contains(i)) { i++; } // пропускаем позиции врагов
+
+                if (i >= maxUnitAtLoc) {
+                    break;
+                }
+
+                set.add(new UnitWithLocation(unit.getName(), unit.getSourceGoldCount(), i, locations.get(k)));
+                i++;
+
+            }
+        }
+        return set;
+    }
+
+    /**
+     * @param lambda        - количество особей в популяции
+     * @param tournamentS   - количество особей в турнире (естественный отбор сильнейшей среди S особей)
+     * @param chi           - константа вероятности мутации (обычно ставят 1) (для Пуассоновского распределения)
+     * @param func          - IEvaluator
+     * @param locations     - локации
+     */
+    public EvolutionAlgorithm(int lambda, int tournamentS, double chi,
+                              IEvaluator func, List<EnemyLocation> locations) {
+        this.lambda = lambda;
+        this.countLoc = locations.size();
+        this.maxUnitAtLoc = (countLoc > 0)? locations.get(0).getMaxPositionsQuantity(): 0;
+        this.func = func;
+        this.chi = chi;
+        service = Executors.newFixedThreadPool(8);
+        this.tournamentS = tournamentS;
+        this.locations = locations;
+    }
+
     private void setOptInd(Individual ind) {
         if (ind.cost > optInd.cost) {
             optInd = ind;
         }
     }
 
-    private void swapUnitAtLocs(List<String> loc1, List<String> loc2) {
+    private void swapUnitAtLocs(List<Unit> loc1, List<Unit> loc2) {
         if (random.nextDouble() > 0.5) {
-            List<String> b = loc1;
+            List<Unit> b = loc1;
             loc1 = loc2;
             loc2 = b;
         }
 
         if (loc1.size() != 0) {
-            String unit1 = loc1.remove(random.nextInt(loc1.size()));
+            Unit unit1 = loc1.remove(random.nextInt(loc1.size()));
             loc2.add(unit1);
-            if (loc2.size() > maxUnitAtLoc) { //TODO: Заменить на (maxUnitAtLoc - EnemyUnitCountAtLoc)
-                String unit2 = loc2.remove(random.nextInt(loc2.size()));
+            if (loc2.size() > maxUnitAtLoc) {
+                Unit unit2 = loc2.remove(random.nextInt(loc2.size()));
                 loc1.add(unit2);
             }
         }
@@ -113,8 +192,7 @@ public class EvolutionAlgorithm {
                 for (int j = 0; j < countMut; j++) {
                     mutation(newInd);
                 }
-                newInd.updateCost(func.apply(newInd.locations));
-
+                newInd.updateCost(getCost(newInd));
                 setOptInd(newInd);
                 threadPopulation.add(newInd);
                 countDownLatch.countDown();
@@ -134,23 +212,24 @@ public class EvolutionAlgorithm {
         return tournamentSelectionAndMutation(population);
     }
 
-    public List<List<String>> start(Integer iter, List<String> names) {
+    public Set<UnitWithLocation> start(List<Unit> names) {
         // Строим случайным образом генотип
         List<Individual> population = new ArrayList<>();
 
-        List<List<String>> randPop = new ArrayList<>();
-        List<List<String>> randPopBuf = new ArrayList<>(); // Для полных локаций - буфер
-        List<String> emptyLoc = new ArrayList<>(); // скидываем остальных юнитов сюда
+        List<List<Unit>> randPop = new ArrayList<>();
+        List<List<Unit>> randPopBuf = new ArrayList<>(); // Для полных локаций - буфер
+        List<Unit> emptyLoc = new ArrayList<>(); // скидываем остальных юнитов сюда
         for (int i = 0; i < lambda; i++) {
             randPop.clear();
             randPopBuf.clear();
+            emptyLoc.clear();
             for (int j = 0; j < countLoc; j++) {
                 randPop.add(new ArrayList<>());
             }
             int countNotFullLoc = countLoc;
-            for (String name : names) {
+            for (Unit name : names) {
                 if (randPop.size() != 0) {
-                    List<String> buf = randPop.get(random.nextInt(countNotFullLoc));
+                    List<Unit> buf = randPop.get(random.nextInt(countNotFullLoc));
                     if (buf.size() == countLoc) {
                         randPopBuf.add(buf);
                         countNotFullLoc--;
@@ -163,14 +242,25 @@ public class EvolutionAlgorithm {
                 }
             }
             randPop.addAll(randPopBuf);
-            population.add(new Individual(randPop, emptyLoc, func.apply(randPop)));
+            Individual ind = new Individual(randPop, emptyLoc, 0);
+            ind.updateCost(getCost(ind));
+            if (optInd == null || ind.cost > optInd.cost) {
+                optInd = ind;
+            }
+            population.add(ind);
         }
 
         // Строим новые популяции
-        for (int i = 0; i < iter; i++) {
+        long startTime = System.currentTimeMillis();
+        long sumTime = 0;
+        for(long curTime = 0, i = 1;
+                        curTime + sumTime/(double)i < 5000. ;
+                        curTime = System.currentTimeMillis() - startTime, i++,
+                        sumTime += curTime)
+        {
             population = selectionAndMutation(population);
         }
-        return optInd.locations;
+        return placeUnit(optInd);
     }
 
     private static class Individual {
