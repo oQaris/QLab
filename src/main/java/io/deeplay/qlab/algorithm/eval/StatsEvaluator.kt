@@ -7,7 +7,7 @@ import io.deeplay.qlab.parser.models.input.EnemyLocation
 import io.deeplay.qlab.parser.models.output.UnitWithLocation
 import kotlin.math.abs
 
-class MonteCarloEvaluator(private val history: List<Round>) : IEvaluator {
+class StatsEvaluator(private val history: List<Round>) : IEvaluator {
 
     private val stats: Map<String, Stat> = history.flatMap { it.ourUnits + it.opponentUnits }
         .groupBy { it.name }.mapValues { (_, units) ->

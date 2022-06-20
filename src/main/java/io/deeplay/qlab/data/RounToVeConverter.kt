@@ -35,7 +35,7 @@ fun main() {
     println("Сохранено ${roundsStd.size} ${roundsStd.first().size}-мерных векторов")
 }
 
-typealias Profiles = Map</*Pair<*/String/*, Int>*/, FloatArray>
+typealias Profiles = Map<String, FloatArray>
 
 private fun standardizeRounds(
     history: List<Round>,
@@ -59,21 +59,20 @@ private fun standardizeRounds(
             FloatArray(levels.size)
             { if (levels[it] == round.locationLevel) 1f else 0f }.toList()
         )
-        //curRoundNorm.add(levels.indexOf(round.locationLevel).toFloat())
         // Данные о расположенных юнитах
         val roundProfiles = (round.ourUnits + round.opponentUnits).let { units ->
             buildList {
                 repeat(maxPosition) { pos ->
                     val unit = units.firstOrNull { it.locatePosition == pos }
                     if (unit != null) {
-                        val rawProfile = profiles[unit.name /*to unit.locatePosition*/]
+                        val rawProfile = profiles[unit.name]
                             ?.toList() ?: medianProfile
                         add(
                             rawProfile // добавляем в конец sourceGold в раунде
                                 .plus((unit.sourceGoldCount).toFloat())
                                 .plus( // 01 - наш, 10 - не наш
-                                    if (unit in round.ourUnits) listOf(1f/*, 1f*/)
-                                    else listOf(0f/*, 0f*/)
+                                    if (unit in round.ourUnits) listOf(0f, 1f)
+                                    else listOf(1f, 0f)
                                 ).also { require(it.size == sizeDataOneUnit) }
                         )
                     } else add(FloatArray(sizeDataOneUnit).toList()) // нули
@@ -111,7 +110,7 @@ private fun genProfiles(history: List<Round>): Profiles {
 
     return unitsEntries
         .filterNot { it.name in deletedUnits }
-        .groupBy { it.name /*to it.locatePosition*/ }
+        .groupBy { it.name }
         .mapValues { (_, entries) ->
             listOf(
                 entries.mean { it.evasiveness.toFloat() },
@@ -139,7 +138,8 @@ private fun saveRounds(rounds: List<FloatArray>, fileName: String) {
             repeat(rounds.first().size - 1) {
                 writer.write("p${it},")
             }
-            //writer.write("lvl,ev1,ag1,ra1,sh1,sg1,gp1,vr1,sgc1,our1,ev2,ag2,ra2,sh2,sg2,gp2,vr2,sgc2,our2,")
+            // Для 1 на 1 будет такой порядок:
+            // writer.write("lvl,ev1,ag1,ra1,sh1,sg1,gp1,vr1,sgc1,our1,ev2,ag2,ra2,sh2,sg2,gp2,vr2,sgc2,our2,")
             writer.write("our_gp")
             writer.newLine()
 

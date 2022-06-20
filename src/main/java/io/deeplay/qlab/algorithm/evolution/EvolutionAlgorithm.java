@@ -13,62 +13,34 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 public class EvolutionAlgorithm {
-    private final int lambda;                       // Размер популяции
+    private final int lambda;         // Размер популяции
     private final IEvaluator func;    // Функция приспособленности
-    private final double chi;                       // Вероятность мутации
+    private final double chi;         // Вероятность мутации
     private final int maxUnitAtLoc;
     private final int countLoc;
     private final List<EnemyLocation> locations;
     private final ExecutorService service;
-    private Individual optInd;
-
     private final int tournamentS;
     private final Random random = new Random();
+    private Individual optInd;
 
-    private static class Individual {
-        public List <List<Unit>> locations;
-        public List <Unit> emptyLoc;
-        public double cost;
-
-        public Individual(List <List<Unit>> locations, List <Unit> emptyLoc, double cost) {
-            this.locations = new ArrayList<>();
-            for (List<Unit> loc: locations) {
-                this.locations.add(new ArrayList<>(loc));
-            }
-            this.emptyLoc = new ArrayList<>(emptyLoc);
-            this.cost = cost;
-        }
-
-        public Individual(Individual ind) {
-            this(ind.locations, ind.emptyLoc, ind.cost);
-        }
-
-        public void updateCost(double cost) {
-            this.cost = cost;
-        }
-    }
-
-    private double getCost(Individual individual) {
-        Set<UnitWithLocation> set = new HashSet<>();
-        int k = 0;
-        for (List<Unit> item: individual.locations) {
-            int i = 0;
-            EnemyLocation loc = locations.get(k);
-            Set<Integer> index = loc.getOpponentUnits().stream().map(Unit::getLocatePosition)
-                    .collect(Collectors.toCollection(TreeSet::new));    // позиции врагов
-            for (Unit unit: item) {
-                while (index.contains(i)) { i++; } // пропускаем позиции врагов
-
-                if (i >= maxUnitAtLoc) {
-                    break;
-                }
-
-                set.add(new UnitWithLocation(unit.getName(), unit.getSourceGoldCount(), i, loc));
-                i++;
-            }
-            k++;
-        }
-        return func.evaluateGoldProfit(set);
+    /**
+     * @param lambda      - количество особей в популяции
+     * @param tournamentS - количество особей в турнире (естественный отбор сильнейшей среди S особей)
+     * @param chi         - константа вероятности мутации (обычно ставят 1) (для Пуассоновского распределения)
+     * @param func        - IEvaluator
+     * @param locations   - локации
+     */
+    public EvolutionAlgorithm(int lambda, int tournamentS, double chi,
+                              IEvaluator func, List<EnemyLocation> locations) {
+        this.lambda = lambda;
+        this.countLoc = locations.size();
+        this.maxUnitAtLoc = (countLoc > 0) ? locations.get(0).getMaxPositionsQuantity() : 0;
+        this.func = func;
+        this.chi = chi;
+        this.service = Executors.newFixedThreadPool(8);
+        this.tournamentS = tournamentS;
+        this.locations = locations;
     }
 
     private static int getPoisson(double lambda) {
@@ -84,17 +56,44 @@ public class EvolutionAlgorithm {
         return k - 1;
     }
 
+    private double getCost(Individual individual) {
+        Set<UnitWithLocation> set = new HashSet<>();
+        int k = 0;
+        for (List<Unit> item : individual.locations) {
+            int i = 0;
+            EnemyLocation loc = locations.get(k);
+            Set<Integer> index = loc.getOpponentUnits().stream().map(Unit::getLocatePosition)
+                    .collect(Collectors.toCollection(TreeSet::new));    // позиции врагов
+            for (Unit unit : item) {
+                while (index.contains(i)) {
+                    i++;
+                } // пропускаем позиции врагов
+
+                if (i >= maxUnitAtLoc) {
+                    break;
+                }
+
+                set.add(new UnitWithLocation(unit.getName(), unit.getSourceGoldCount(), i, loc));
+                i++;
+            }
+            k++;
+        }
+        return func.evaluateGoldProfit(set);
+    }
+
     private Set<UnitWithLocation> placeUnit(Individual ind) {
         Set<UnitWithLocation> set = new HashSet<>();
         int k = 0;
-        for (List<Unit> item: ind.locations) {
+        for (List<Unit> item : ind.locations) {
             EnemyLocation loc = locations.get(k);
             Set<Integer> index = loc.getOpponentUnits().stream().map(Unit::getLocatePosition)
                     .collect(Collectors.toCollection(TreeSet::new));    // позиции врагов
 
             int i = 0;
-            for (Unit unit: item) {
-                while (index.contains(i)) { i++; } // пропускаем позиции врагов
+            for (Unit unit : item) {
+                while (index.contains(i)) {
+                    i++;
+                } // пропускаем позиции врагов
 
                 if (i >= maxUnitAtLoc) {
                     break;
@@ -106,25 +105,6 @@ public class EvolutionAlgorithm {
             }
         }
         return set;
-    }
-
-    /**
-     * @param lambda        - количество особей в популяции
-     * @param tournamentS   - количество особей в турнире (естественный отбор сильнейшей среди S особей)
-     * @param chi           - константа вероятности мутации (обычно ставят 1) (для Пуассоновского распределения)
-     * @param func          - IEvaluator
-     * @param locations     - локации
-     */
-    public EvolutionAlgorithm(int lambda, int tournamentS, double chi,
-                              IEvaluator func, List<EnemyLocation> locations) {
-        this.lambda = lambda;
-        this.countLoc = locations.size();
-        this.maxUnitAtLoc = (countLoc > 0)? locations.get(0).getMaxPositionsQuantity(): 0;
-        this.func = func;
-        this.chi = chi;
-        service = Executors.newFixedThreadPool(8);
-        this.tournamentS = tournamentS;
-        this.locations = locations;
     }
 
     private void setOptInd(Individual ind) {
@@ -139,7 +119,6 @@ public class EvolutionAlgorithm {
             loc1 = loc2;
             loc2 = b;
         }
-
         if (loc1.size() != 0) {
             Unit unit1 = loc1.remove(random.nextInt(loc1.size()));
             loc2.add(unit1);
@@ -148,7 +127,6 @@ public class EvolutionAlgorithm {
                 loc1.add(unit2);
             }
         }
-
     }
 
     private void mutation(Individual individual) {
@@ -160,14 +138,12 @@ public class EvolutionAlgorithm {
             id2 = id;
             id = b;
         }
-
         if (id == countLoc && id != id2) { // id попал на локацию с пулом юнитов (не игровую)
             swapUnitAtLocs(individual.emptyLoc, individual.locations.get(id2));
         }
         if (id != countLoc) {
             swapUnitAtLocs(individual.locations.get(id), individual.locations.get(id2));
         }
-
     }
 
     private List<Individual> tournamentSelectionAndMutation(List<Individual> population) {
@@ -253,24 +229,26 @@ public class EvolutionAlgorithm {
         // Строим новые популяции
         long startTime = System.currentTimeMillis();
         long sumTime = 0;
-        for(long curTime = 0, i = 1;
-                        curTime + sumTime/(double)i < 5000. ;
-                        curTime = System.currentTimeMillis() - startTime, i++,
-                        sumTime += curTime)
-        {
+        for (long curTime = 0, i = 1;
+             curTime + sumTime / (double) i < 5000.;
+             curTime = System.currentTimeMillis() - startTime, i++,
+                     sumTime += curTime) {
             population = selectionAndMutation(population);
         }
         return placeUnit(optInd);
     }
 
     private static class Individual {
-        public List<List<String>> locations;
-        public List<String> emptyLoc;
+        public List<List<Unit>> locations;
+        public List<Unit> emptyLoc;
         public double cost;
 
-        public Individual(List<List<String>> locations, List<String> emptyLoc, double cost) {
-            this.locations = new ArrayList<>(locations);
-            this.emptyLoc = emptyLoc;
+        public Individual(List<List<Unit>> locations, List<Unit> emptyLoc, double cost) {
+            this.locations = new ArrayList<>();
+            for (List<Unit> loc : locations) {
+                this.locations.add(new ArrayList<>(loc));
+            }
+            this.emptyLoc = new ArrayList<>(emptyLoc);
             this.cost = cost;
         }
 
@@ -282,5 +260,4 @@ public class EvolutionAlgorithm {
             this.cost = cost;
         }
     }
-
 }

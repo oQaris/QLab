@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test
 import java.io.File
 import kotlin.math.abs
 
-internal class MonteCarloEvaluatorTest {
+internal class StatsEvaluatorTest {
 
     @Test
     fun evaluateGoldProfit1Test() {
@@ -21,7 +21,7 @@ internal class MonteCarloEvaluatorTest {
         assumeTrue(dataFile.exists(), "Data file not found")
 
         val history: List<Round> = Parser.parseRoundList(dataFile)
-        val evaluator = MonteCarloEvaluator(history)
+        val evaluator = StatsEvaluator(history)
 
         // данные из раунда 5c31e7d2-1884-47b6-9c62-a53ee9d4ad63
         val location = EnemyLocation("Factoria11", 50, 9, listOf(Unit("РЕФРОД ГАСТИНРИЦА", 101.0, 0)))
@@ -38,7 +38,7 @@ internal class MonteCarloEvaluatorTest {
 
         var error = 0.0
         testData.subList(10650, testData.size).forEach { round ->
-            val evaluator = MonteCarloEvaluator(history - round)
+            val evaluator = StatsEvaluator(history - round)
 
             val actual = round.ourUnits.sumOf { it.goldProfit }
             val expected = evaluator.evaluateGoldProfit(round.toUnitsWithLocation())

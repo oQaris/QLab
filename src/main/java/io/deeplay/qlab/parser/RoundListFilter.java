@@ -1,6 +1,5 @@
 package io.deeplay.qlab.parser;
 
-
 import io.deeplay.qlab.parser.models.UnitWithResult;
 import io.deeplay.qlab.parser.models.history.Round;
 
@@ -10,7 +9,6 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
 
 public class RoundListFilter {
     private static final double EPS = 1E-9;

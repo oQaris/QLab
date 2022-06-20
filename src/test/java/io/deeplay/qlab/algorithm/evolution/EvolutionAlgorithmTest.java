@@ -12,13 +12,11 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-
 class EvolutionAlgorithmTest {
     private static final String DIFF_SIZE = "Разный размер";
     private static final String DIFF_PROFIT_ESTIMATION = "Не совпадает оценка";
     private static final String POS_COLLAPSE = "Коллапс позиций";
     private static final String UNIT_COLLAPSE = "Коллапс юнитов";
-
 
     @Test
     void findDisposition_ManyLocationTest() {
@@ -34,8 +32,6 @@ class EvolutionAlgorithmTest {
 
         assertAll(
                 () -> assertEquals(5, actual.size(), DIFF_SIZE),
-                //() -> assertEquals(1 + 2 + 3 + 4 + 5, new SumSourceProfitEvaluator().evaluateGoldProfit(actual),
-                //        DIFF_PROFIT_ESTIMATION),
                 () -> assertEquals(5, actual.stream().map(UnitWithLocation::getLocatePosition).count(), POS_COLLAPSE),
                 () -> assertEquals(5, actual.stream().map(UnitWithLocation::getName).count(), UNIT_COLLAPSE)
         );

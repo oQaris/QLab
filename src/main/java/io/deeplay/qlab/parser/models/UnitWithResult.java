@@ -67,7 +67,6 @@ public class UnitWithResult extends Unit {
         this.shield = shield;
     }
 
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -1,6 +1,5 @@
 package io.deeplay.qlab.parser;
 
-
 import io.deeplay.qlab.parser.models.Unit;
 import io.deeplay.qlab.parser.models.UnitWithResult;
 import io.deeplay.qlab.parser.models.history.Round;
@@ -15,7 +14,6 @@ import java.nio.file.Path;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 
 class ParserTest {
     @Test
