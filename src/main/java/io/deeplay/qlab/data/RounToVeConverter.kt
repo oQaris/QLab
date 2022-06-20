@@ -31,11 +31,11 @@ fun main() {
     roundsStd = normalizeStd(roundsStd) { normContext }
 
     println("Сохранение в файл...")
-    saveRounds(roundsStd, "trainData/11new.csv")
+    saveRounds(roundsStd, "trainData/11.csv")
     println("Сохранено ${roundsStd.size} ${roundsStd.first().size}-мерных векторов")
 }
 
-typealias Profiles = Map<Pair<String, Int>, FloatArray>
+typealias Profiles = Map</*Pair<*/String/*, Int>*/, FloatArray>
 
 private fun standardizeRounds(
     history: List<Round>,
@@ -59,13 +59,14 @@ private fun standardizeRounds(
             FloatArray(levels.size)
             { if (levels[it] == round.locationLevel) 1f else 0f }.toList()
         )
+        //curRoundNorm.add(levels.indexOf(round.locationLevel).toFloat())
         // Данные о расположенных юнитах
         val roundProfiles = (round.ourUnits + round.opponentUnits).let { units ->
             buildList {
                 repeat(maxPosition) { pos ->
                     val unit = units.firstOrNull { it.locatePosition == pos }
                     if (unit != null) {
-                        val rawProfile = profiles[unit.name to unit.locatePosition]
+                        val rawProfile = profiles[unit.name /*to unit.locatePosition*/]
                             ?.toList() ?: medianProfile
                         add(
                             rawProfile // добавляем в конец sourceGold в раунде
@@ -110,7 +111,7 @@ private fun genProfiles(history: List<Round>): Profiles {
 
     return unitsEntries
         .filterNot { it.name in deletedUnits }
-        .groupBy { it.name to it.locatePosition }
+        .groupBy { it.name /*to it.locatePosition*/ }
         .mapValues { (_, entries) ->
             listOf(
                 entries.mean { it.evasiveness.toFloat() },
@@ -138,6 +139,7 @@ private fun saveRounds(rounds: List<FloatArray>, fileName: String) {
             repeat(rounds.first().size - 1) {
                 writer.write("p${it},")
             }
+            //writer.write("lvl,ev1,ag1,ra1,sh1,sg1,gp1,vr1,sgc1,our1,ev2,ag2,ra2,sh2,sg2,gp2,vr2,sgc2,our2,")
             writer.write("our_gp")
             writer.newLine()
 
