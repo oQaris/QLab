@@ -2,7 +2,6 @@ package io.deeplay.qlab.data
 
 import io.deeplay.qlab.parser.Parser
 import io.deeplay.qlab.parser.RoundListFilter
-import io.deeplay.qlab.parser.models.UnitWithResult
 import io.deeplay.qlab.parser.models.history.Round
 import java.io.File
 import java.util.*
@@ -11,6 +10,7 @@ fun main() {
     println("Парсинг...")
     val history = Parser.parseRoundList(File("testData/anonymized_data.json"))
         .run { RoundListFilter.filter(this) }
+    println("Всего данных: ${history.size}")
 
     println("Генерация профилей...")
     val profiles = genProfiles(history)
@@ -50,8 +50,6 @@ private fun standardizeRounds(
     val medianProfile = transpose(profiles.values)
         .map { col -> col.toList().median { it } }
     println("Медианный профиль: $medianProfile")
-
-    val locs = history.map { it.locationName }.distinct().sorted()
 
     val roundsStandardized = mutableListOf<FloatArray>()
     history.forEach { round ->
