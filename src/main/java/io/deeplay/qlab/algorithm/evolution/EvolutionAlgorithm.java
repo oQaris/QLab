@@ -127,7 +127,6 @@ public class EvolutionAlgorithm {
         this.locations = locations;
     }
 
-
     private void setOptInd(Individual ind) {
         if (ind.cost > optInd.cost) {
             optInd = ind;
@@ -153,8 +152,8 @@ public class EvolutionAlgorithm {
     }
 
     private void mutation(Individual individual) {
-        int id = random.nextInt(countLoc+1);
-        int id2 = random.nextInt(countLoc+1);
+        int id = random.nextInt(countLoc + 1);
+        int id2 = random.nextInt(countLoc + 1);
 
         if (id < id2) {
             int b = id2;
@@ -180,7 +179,7 @@ public class EvolutionAlgorithm {
             service.submit(() -> {
                 // Селекция
                 Individual newInd = population.get(random.nextInt(lambda));
-                for (int j = 1; j < tournamentS; j++)  {
+                for (int j = 1; j < tournamentS; j++) {
                     Individual buf = population.get(random.nextInt(lambda));
                     if (buf.cost > newInd.cost) {
                         newInd = buf;
@@ -238,8 +237,7 @@ public class EvolutionAlgorithm {
                     } else {
                         buf.add(name);
                     }
-                }
-                else {
+                } else {
                     emptyLoc.add(name);
                 }
             }
@@ -263,6 +261,26 @@ public class EvolutionAlgorithm {
             population = selectionAndMutation(population);
         }
         return placeUnit(optInd);
+    }
+
+    private static class Individual {
+        public List<List<String>> locations;
+        public List<String> emptyLoc;
+        public double cost;
+
+        public Individual(List<List<String>> locations, List<String> emptyLoc, double cost) {
+            this.locations = new ArrayList<>(locations);
+            this.emptyLoc = emptyLoc;
+            this.cost = cost;
+        }
+
+        public Individual(Individual ind) {
+            this(ind.locations, ind.emptyLoc, ind.cost);
+        }
+
+        public void updateCost(double cost) {
+            this.cost = cost;
+        }
     }
 
 }

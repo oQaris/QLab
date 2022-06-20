@@ -10,48 +10,48 @@ fun main() {
     println("Парсинг...")
     val history = Parser.parseRoundList(File("testData/anonymized_data.json"))
         .run { RoundListFilter.filter(this) }
+    println("Всего данных: ${history.size}")
 
     println("Генерация профилей...")
     val profiles = genProfiles(history)
     val levels = history.map { it.locationLevel }.distinct().sorted()
-    require(levels.size == 10)
 
     // Можно настроить выбор раундов
-    val filter = listOf(1 to 1)
+    val rounds = history.filter { it.ourUnits.size == 1 && it.opponentUnits.size == 1 }
 
-    filter.forEach { (our, opp) ->
-        println("\nНаших: $our, Противников: $opp")
-        val rounds = history.filter { it.ourUnits.size == our && it.opponentUnits.size == opp }
+    println("Стандартизация данных...")
+    var roundsStd = standardizeRounds(rounds, levels, profiles)
 
-        println("Стандартизация данных...")
-        var roundsStd = standardizeRounds(rounds, levels, profiles)
+    val normContext = genMinimaxNormContext(roundsStd)
+    println("Контекст нормализации:")
+    println(normContext.first.joinToString { String.format(Locale.ENGLISH, "%.8f", it) })
+    println(normContext.second.joinToString { String.format(Locale.ENGLISH, "%.8f", it) })
 
-        val normContext = genZNormContext(roundsStd)
-        println("Контекст для нормализации:")
-        println(normContext.first.joinToString { String.format(Locale.ENGLISH, "%.8f", it) })
-        println(normContext.second.joinToString { String.format(Locale.ENGLISH, "%.8f", it) })
+    println("Нормализация данных...")
+    roundsStd = normalizeStd(roundsStd) { normContext }
 
-        println("Нормализация данных...")
-        roundsStd = normalizeStd(roundsStd) { normContext }
-
-        println("Сохранение в файл...")
-        saveRounds(roundsStd, "trainData/11std.csv")
-        println("Сохранено ${roundsStd.size} ${roundsStd.first().size}-мерных векторов")
-    }
+    println("Сохранение в файл...")
+    saveRounds(roundsStd, "trainData/11new.csv")
+    println("Сохранено ${roundsStd.size} ${roundsStd.first().size}-мерных векторов")
 }
+
+typealias Profiles = Map<Pair<String, Int>, FloatArray>
 
 private fun standardizeRounds(
     history: List<Round>,
     levels: List<Int>,
-    profiles: Map<String, FloatArray>
+    profiles: Profiles
 ): List<FloatArray> {
 
-    val sizeDataOneUnit = // длина профиля + дополнительные данные
-        profiles.entries.first().value.size + 3
+    val sizeDataOneUnit = // Длина профиля + дополнительные данные
+        profiles.entries.first().value.size + 2
 
     val maxPosition = history.maxOf { it.ourUnits.size + it.opponentUnits.size }
-    val roundsStandardized = mutableListOf<FloatArray>()
+    val medianProfile = transpose(profiles.values)
+        .map { col -> col.toList().median { it } }
+    println("Медианный профиль: $medianProfile")
 
+    val roundsStandardized = mutableListOf<FloatArray>()
     history.forEach { round ->
         val curRoundNorm = mutableListOf<Float>()
         // One-Hot encoding уровня
@@ -65,17 +65,17 @@ private fun standardizeRounds(
                 repeat(maxPosition) { pos ->
                     val unit = units.firstOrNull { it.locatePosition == pos }
                     if (unit != null) {
-                        val rawProfile = profiles[unit.name]!!
+                        val rawProfile = profiles[unit.name to unit.locatePosition]
+                            ?.toList() ?: medianProfile
                         add(
-                            rawProfile.toList()
-                                // добавляем в конец sourceGold в раунде
+                            rawProfile // добавляем в конец sourceGold в раунде
                                 .plus((unit.sourceGoldCount).toFloat())
                                 .plus( // 01 - наш, 10 - не наш
-                                    if (unit in round.ourUnits) listOf(0f, 1f)
-                                    else listOf(1f, 0f)
+                                    if (unit in round.ourUnits) listOf(1f/*, 1f*/)
+                                    else listOf(0f/*, 0f*/)
                                 ).also { require(it.size == sizeDataOneUnit) }
                         )
-                    } else add(FloatArray(sizeDataOneUnit).toList())
+                    } else add(FloatArray(sizeDataOneUnit).toList()) // нули
                 }
             }
         }.flatten()
@@ -95,31 +95,39 @@ private fun normalizeStd(
     return data.map { it.applyNormByRow(normContext(data)).toFloatArray() }
 }
 
-private fun genProfiles(history: List<Round>): Map<String, FloatArray> {
-    return history.flatMap { it.ourUnits + it.opponentUnits }
-        .groupBy { it.name }
-        .mapValues { (_, units) ->
+private fun genProfiles(history: List<Round>): Profiles {
+    val numRoundsNeeded = 5
+    val unitsEntries = history.flatMap { it.ourUnits + it.opponentUnits }
+
+    val unitsWithFreq = unitsEntries
+        .groupingBy { it.name }
+        .eachCount()
+    val deletedUnits = unitsWithFreq
+        .filter { it.value < numRoundsNeeded }
+        .map { it.key }
+
+    println("${deletedUnits.size} юнитов из ${unitsWithFreq.size} будут заменены на медианный профиль")
+
+    return unitsEntries
+        .filterNot { it.name in deletedUnits }
+        .groupBy { it.name to it.locatePosition }
+        .mapValues { (_, entries) ->
             listOf(
-                units.mean { it.evasiveness.toFloat() },
-                units.mean { it.aggression.toFloat() },
-                units.mean { it.responseAggression.toFloat() },
-                units.mean { it.shield.toFloat() },
-                units.mean { it.sourceGoldCount.toFloat() },
-                units.mean { it.goldProfit.toFloat() },
-                units.mean { if (it.goldProfit > 0) 1f else 0f }
+                entries.mean { it.evasiveness.toFloat() },
+                entries.mean { it.aggression.toFloat() },
+                entries.mean { it.responseAggression.toFloat() },
+                entries.mean { it.shield.toFloat() },
+                entries.mean { it.sourceGoldCount.toFloat() },
+                entries.mean { it.goldProfit.toFloat() },
+                entries.mean { if (it.goldProfit > 0) 1f else 0f } // винрейт
             ).toFloatArray()
         }
 }
 
-private fun saveProfiles(profiles: Map<String, FloatArray>, fileName: String) {
-    File(fileName).bufferedWriter().use { writer ->
-        writer.write("name,p_e,p_a,p_r,p_s,p_gc,p_gp,vr")
-        writer.newLine()
-        profiles.forEach { (name, row) ->
-            writer.write("$name,")
-            writer.write(row.joinToString(","))
-            writer.newLine()
-        }
+private fun transpose(src: Collection<FloatArray>) = buildList {
+    for (nCol in src.first().indices) {
+        val column = src.map { it[nCol] }
+        add(column.toFloatArray())
     }
 }
 
@@ -127,19 +135,17 @@ private fun saveRounds(rounds: List<FloatArray>, fileName: String) {
     File(fileName)
         .also { it.parentFile.mkdirs() }
         .bufferedWriter().use { writer ->
-            val spaceForUnits = rounds.first().size - 11
-            require(spaceForUnits % 10 == 0)
-
-            writer.write("lvl1,lvl2,lvl3,lvl4,lvl5,lvl6,lvl7,lvl8,lvl9,lvl10,")
-            repeat(spaceForUnits / 10) {
-                writer.write("p${it}_e,p${it}_a,p${it}_r,p${it}_s,p${it}_gc,p${it}_gp,vr${it},gc${it},p${it}_opp,p${it}_our,")
+            repeat(rounds.first().size - 1) {
+                writer.write("p${it},")
             }
             writer.write("our_gp")
             writer.newLine()
 
             rounds.forEach { row ->
-                writer.write(row.joinToString(",") { String.format(Locale.ENGLISH, "%.8f", it) })
+                writer.write(row.joinToString(",") {
+                    String.format(Locale.ENGLISH, "%.8f", it)
+                })
                 writer.newLine()
             }
-    }
+        }
 }
