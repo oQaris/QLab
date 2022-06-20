@@ -12,37 +12,27 @@ import java.util.function.Function;
 
 public class EvolutionAlgorithm {
     private final int lambda;                       // Размер популяции
-    private final Function<List <List<String>>, Double> func;    // Функция приспособленности
+    private final Function<List<List<String>>, Double> func;    // Функция приспособленности
     private final double chi;                       // Вероятность мутации
     private final int maxUnitAtLoc;
     private final int countLoc;
     private final ExecutorService service;
+    private final int tournamentS;
+    private final Random random = new Random();
     private double costPopulation = 1;              // Переменная общая для класса, для удобства (оценка приспособленности
-                                                    // популяции
+    // популяции
     private Individual optInd;
     private double optCost = 0;
 
-    private final int tournamentS;
-    private final Random random = new Random();
-
-    private static class Individual {
-        public List <List<String>> locations;
-        public List <String> emptyLoc;
-        public double cost;
-
-        public Individual(List <List<String>> locations, List <String> emptyLoc, double cost) {
-            this.locations = new ArrayList<>(locations);
-            this.emptyLoc = emptyLoc;
-            this.cost = cost;
-        }
-
-        public Individual(Individual ind) {
-            this(ind.locations, ind.emptyLoc, ind.cost);
-        }
-
-        public void updateCost(double cost) {
-            this.cost = cost;
-        }
+    public EvolutionAlgorithm(int lambda, int n, int tournamentS, double chi, int maxUnitAtLoc,
+                              int countLoc, Function<List<List<String>>, Double> func) {
+        this.lambda = lambda;
+        this.maxUnitAtLoc = maxUnitAtLoc;
+        this.countLoc = countLoc;
+        this.func = func;
+        this.chi = chi;
+        service = Executors.newFixedThreadPool(8);
+        this.tournamentS = tournamentS;
     }
 
     private static int getPoisson(double lambda) {
@@ -57,18 +47,6 @@ public class EvolutionAlgorithm {
 
         return k - 1;
     }
-
-    public EvolutionAlgorithm(int lambda, int n, int tournamentS, double chi, int maxUnitAtLoc,
-                              int countLoc, Function<List <List<String>>, Double> func) {
-        this.lambda = lambda;
-        this.maxUnitAtLoc = maxUnitAtLoc;
-        this.countLoc = countLoc;
-        this.func = func;
-        this.chi = chi;
-        service = Executors.newFixedThreadPool(8);
-        this.tournamentS = tournamentS;
-    }
-
 
     private void setOptInd(Individual ind) {
         if (ind.cost > optInd.cost) {
@@ -95,8 +73,8 @@ public class EvolutionAlgorithm {
     }
 
     private void mutation(Individual individual) {
-        int id = random.nextInt(countLoc+1);
-        int id2 = random.nextInt(countLoc+1);
+        int id = random.nextInt(countLoc + 1);
+        int id2 = random.nextInt(countLoc + 1);
 
         if (id < id2) {
             int b = id2;
@@ -122,7 +100,7 @@ public class EvolutionAlgorithm {
             service.submit(() -> {
                 // Селекция
                 Individual newInd = population.get(random.nextInt(lambda));
-                for (int j = 1; j < tournamentS; j++)  {
+                for (int j = 1; j < tournamentS; j++) {
                     Individual buf = population.get(random.nextInt(lambda));
                     if (buf.cost > newInd.cost) {
                         newInd = buf;
@@ -180,8 +158,7 @@ public class EvolutionAlgorithm {
                     } else {
                         buf.add(name);
                     }
-                }
-                else {
+                } else {
                     emptyLoc.add(name);
                 }
             }
@@ -190,10 +167,30 @@ public class EvolutionAlgorithm {
         }
 
         // Строим новые популяции
-        for(int i = 0; i < iter; i++) {
+        for (int i = 0; i < iter; i++) {
             population = selectionAndMutation(population);
         }
         return optInd.locations;
+    }
+
+    private static class Individual {
+        public List<List<String>> locations;
+        public List<String> emptyLoc;
+        public double cost;
+
+        public Individual(List<List<String>> locations, List<String> emptyLoc, double cost) {
+            this.locations = new ArrayList<>(locations);
+            this.emptyLoc = emptyLoc;
+            this.cost = cost;
+        }
+
+        public Individual(Individual ind) {
+            this(ind.locations, ind.emptyLoc, ind.cost);
+        }
+
+        public void updateCost(double cost) {
+            this.cost = cost;
+        }
     }
 
 }
