@@ -20,6 +20,14 @@ fun main() {
     // Можно настроить выбор раундов
     val rounds = history.filter { it.ourUnits.size == 1 && it.opponentUnits.size == 1 }
 
+    println("Юнитов в выбранных раундах: " +
+            rounds.flatMap { it.ourUnits + it.opponentUnits }.map { it.name }.distinct().size
+    )
+    println(
+        "Локаций в выбранных раундах: " +
+                rounds.map { it.locationName }.distinct().size
+    )
+
     println("Стандартизация данных...")
     var roundsStd = standardizeRounds(rounds, levels, unitsProfiles, locationsProfiles)
 
@@ -32,7 +40,7 @@ fun main() {
     //roundsStd = normalizeStd(roundsStd) { normContext }
 
     println("Сохранение в файл...")
-    saveRounds(roundsStd, "trainData/11nnnnnn.csv")
+    saveRounds(roundsStd, "trainData/11nnn.csv")
     println("Сохранено ${roundsStd.size} ${roundsStd.first().size}-мерных векторов")
 }
 
@@ -44,7 +52,7 @@ private fun standardizeRounds(
 ): List<FloatArray> {
 
     val sizeDataOneUnit = // Длина профиля юнита + дополнительные данные
-        unitsProfiles.entries.first().value.size + 3
+        unitsProfiles.entries.first().value.size + 2
 
     val medianUnitProfile = transpose(unitsProfiles.values)
         .map { col -> col.toList().median { it } }
@@ -61,7 +69,7 @@ private fun standardizeRounds(
         val curRoundNorm = mutableListOf<Float>()
         // Профиль локации
         curRoundNorm.addAll(
-            unitsProfiles[round.locationName]
+            locationsProfiles[round.locationName]
                 ?.toList() ?: medianLocationProfile
         )
         // One-Hot encoding уровня
@@ -80,9 +88,9 @@ private fun standardizeRounds(
                         add(
                             rawProfile // добавляем в конец sourceGold в раунде
                                 .plus((unit.sourceGoldCount).toFloat())
-                                .plus( // 01 - наш, 10 - не наш
-                                    if (unit in round.ourUnits) listOf(0f, 1f)
-                                    else listOf(1f, 0f)
+                                .plus( // 1 - наш, 0 - не наш
+                                    if (unit in round.ourUnits) listOf(1f)
+                                    else listOf(0f)
                                 ).also { require(it.size == sizeDataOneUnit) }
                         )
                     } else add(FloatArray(sizeDataOneUnit).toList()) // нули
@@ -116,11 +124,11 @@ private fun saveRounds(rounds: List<FloatArray>, fileName: String) {
     File(fileName)
         .also { it.parentFile.mkdirs() }
         .bufferedWriter().use { writer ->
-            repeat(rounds.first().size - 1) {
+            /*repeat(rounds.first().size - 1) {
                 writer.write("p${it},")
-            }
+            }*/
             // Для 1 на 1 будет такой порядок:
-            // writer.write("lvl,ev1,ag1,ra1,sh1,sg1,gp1,vr1,sgc1,our1,ev2,ag2,ra2,sh2,sg2,gp2,vr2,sgc2,our2,")
+            writer.write("evl,agl,ral,shl,sgl,gpl,vrl,lvl1,lvl2,lvl3,lvl4,lvl5,lvl6,lvl7,lvl8,lvl9,lvl10,ev1,ag1,ra1,sh1,sg1,gp1,vr1,sgc1,our1,ev2,ag2,ra2,sh2,sg2,gp2,vr2,sgc2,our2,")
             writer.write("our_gp")
             writer.newLine()
 
