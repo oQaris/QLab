@@ -8,10 +8,10 @@ typealias Profiles = Map<String, FloatArray>
 const val minUnitEntries = 10
 const val minLocationEntries = 3
 
-fun genUnitsProfiles(history: List<Round>): Profiles {
-    val unitsEntries = history.flatMap { it.ourUnits + it.opponentUnits }
+fun genUnitProfiles(history: List<Round>): Profiles {
+    val unitEntries = history.flatMap { it.ourUnits + it.opponentUnits }
 
-    val unitsWithFreq = unitsEntries
+    val unitsWithFreq = unitEntries
         .groupingBy { it.name }
         .eachCount()
     val deletedUnits = unitsWithFreq
@@ -20,7 +20,7 @@ fun genUnitsProfiles(history: List<Round>): Profiles {
 
     println("${deletedUnits.size} юнитов из ${unitsWithFreq.size} должны быть заменены на медианный профиль")
 
-    return unitsEntries
+    return unitEntries
         .filterNot { it.name in deletedUnits }
         .groupBy { it.name }
         .mapValues { (_, entries) ->
@@ -28,7 +28,7 @@ fun genUnitsProfiles(history: List<Round>): Profiles {
         }
 }
 
-fun genLocationsProfiles(history: List<Round>): Profiles {
+fun genLocationProfiles(history: List<Round>): Profiles {
     val locsWithFreq = history
         .groupingBy { it.locationName }
         .eachCount()
@@ -42,8 +42,8 @@ fun genLocationsProfiles(history: List<Round>): Profiles {
         .filterNot { it.locationName in deletedLocs }
         .groupBy { it.locationName }
         .mapValues { (_, entries) ->
-            val unitsEntries = entries.flatMap { it.ourUnits + it.opponentUnits }
-            unitsEntries.toProfile()
+            val unitEntries = entries.flatMap { it.ourUnits + it.opponentUnits }
+            unitEntries.toProfile()
         }
 }
 

@@ -13,8 +13,8 @@ fun main() {
     println("Всего данных: ${history.size}")
 
     println("Генерация профилей...")
-    val unitsProfiles = genUnitsProfiles(history)
-    val locationsProfiles = genLocationsProfiles(history)
+    val unitProfiles = genUnitProfiles(history)
+    val locationProfiles = genLocationProfiles(history)
     val levels = history.map { it.locationLevel }.distinct().sorted()
 
     // Можно настроить выбор раундов
@@ -29,15 +29,15 @@ fun main() {
     )
 
     println("Стандартизация данных...")
-    var roundsStd = standardizeRounds(rounds, levels, unitsProfiles, locationsProfiles)
+    var roundsStd = standardizeRounds(rounds, levels, unitProfiles, locationProfiles)
 
-    val normContext = genMinimaxNormContext(roundsStd)
-    println("Контекст нормализации:")
-    println(normContext.first.joinToString { String.format(Locale.ENGLISH, "%.8f", it) })
-    println(normContext.second.joinToString { String.format(Locale.ENGLISH, "%.8f", it) })
+//    val normContext = genMinimaxNormContext(roundsStd)
+//    println("Контекст нормализации:")
+//    println(normContext.first.joinToString { String.format(Locale.ENGLISH, "%.8f", it) })
+//    println(normContext.second.joinToString { String.format(Locale.ENGLISH, "%.8f", it) })
 
-    //println("Нормализация данных...")
-    //roundsStd = normalizeStd(roundsStd) { normContext }
+//    println("Нормализация данных...")
+//    roundsStd = normalizeStd(roundsStd) { normContext }
 
     println("Сохранение в файл...")
     saveRounds(roundsStd, "trainData/11nnn.csv")
@@ -47,18 +47,18 @@ fun main() {
 private fun standardizeRounds(
     history: List<Round>,
     levels: List<Int>,
-    unitsProfiles: Profiles,
-    locationsProfiles: Profiles
+    unitProfiles: Profiles,
+    locationProfiles: Profiles
 ): List<FloatArray> {
 
-    val sizeDataOneUnit = // Длина профиля юнита + дополнительные данные
-        unitsProfiles.entries.first().value.size + 2
+    val sizeDataOneUnit = // Длина профиля юнита + дополнительные данные (наш / не наш, source gold)
+        unitProfiles.entries.first().value.size + 2
 
-    val medianUnitProfile = transpose(unitsProfiles.values)
+    val medianUnitProfile = transpose(unitProfiles.values)
         .map { col -> col.toList().median { it } }
     println("Медианный профиль юнита: $medianUnitProfile")
 
-    val medianLocationProfile = transpose(locationsProfiles.values)
+    val medianLocationProfile = transpose(locationProfiles.values)
         .map { col -> col.toList().median { it } }
     println("Медианный профиль локации: $medianLocationProfile")
 
@@ -69,7 +69,7 @@ private fun standardizeRounds(
         val curRoundNorm = mutableListOf<Float>()
         // Профиль локации
         curRoundNorm.addAll(
-            locationsProfiles[round.locationName]
+            locationProfiles[round.locationName]
                 ?.toList() ?: medianLocationProfile
         )
         // One-Hot encoding уровня
@@ -83,7 +83,7 @@ private fun standardizeRounds(
                 repeat(maxPosition) { pos ->
                     val unit = units.firstOrNull { it.locatePosition == pos }
                     if (unit != null) {
-                        val rawProfile = unitsProfiles[unit.name]
+                        val rawProfile = unitProfiles[unit.name]
                             ?.toList() ?: medianUnitProfile
                         add(
                             rawProfile // добавляем в конец sourceGold в раунде
