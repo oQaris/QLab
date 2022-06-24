@@ -1,5 +1,7 @@
 package io.deeplay.qlab.data
 
+import io.deeplay.qlab.parser.models.Unit
+import io.deeplay.qlab.parser.models.UnitWithResult
 import io.deeplay.qlab.parser.models.history.Round
 import io.deeplay.qlab.parser.models.output.UnitWithLocation
 
@@ -41,7 +43,19 @@ class Standardizer(
     }
 
     fun transform(units: List<UnitWithLocation>): FloatArray {
-        TODO("Доделать")
+        val location = units.map { it.location }.toSet()
+            .also { require(it.size == 1) { "Юниты на разных локациях" } }
+            .single()
+
+        fun convert(u: Unit) = UnitWithResult(u.name, u.sourceGoldCount, u.locatePosition)
+        val opponentUnits = location.opponentUnits.map { convert(it) }
+        val ourUnits = units.map { convert(it) }
+
+        val round = Round(
+            null, location.locationName, location.locationLevel,
+            location.maxPositionsQuantity, opponentUnits, ourUnits
+        )
+        return transform(round)
     }
 
     fun transform(round: Round): FloatArray {
