@@ -20,8 +20,8 @@ class Standardizer(
         fun fit(history: List<Round>): Standardizer {
             val maxPosition = history.maxOf { it.ourUnits.size + it.opponentUnits.size }
             val levels = history.map { it.locationLevel }.distinct().sorted()
-            val unitsProfiles = genUnitsProfiles(history)
-            val locationsProfiles = genLocationsProfiles(history)
+            val unitsProfiles = genUnitProfiles(history)
+            val locationsProfiles = genLocationProfiles(history)
 
             return Standardizer(maxPosition, levels, unitsProfiles, locationsProfiles)
         }
