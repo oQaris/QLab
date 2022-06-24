@@ -33,8 +33,8 @@ fun main() {
 
     val normContext = genMinimaxNormContext(roundsStd)
     println("Контекст нормализации:")
-    println(normContext.first.joinToString { String.format(Locale.ENGLISH, "%.8f", it) })
-    println(normContext.second.joinToString { String.format(Locale.ENGLISH, "%.8f", it) })
+    println(normContext.first.joinToString { it.format() })
+    println(normContext.second.joinToString { it.format() })
 
     println("Нормализация данных...")
     roundsStd = normalize(roundsStd) { normContext }
@@ -55,19 +55,25 @@ private fun saveRounds(rounds: List<FloatArray>, fileName: String) {
     File(fileName)
         .also { it.parentFile.mkdirs() }
         .bufferedWriter().use { writer ->
-            repeat(rounds.first().size - 1) {
-                writer.write("p${it},")
+            // локация
+            val locationFeatureQuan = 7
+            writer.write("evl,agl,ral,shl,sgl,gpl,wrl,")
+            // уровень
+            val levelFeatureQuan = 10
+            writer.write("lvl1,lvl2,lvl3,lvl4,lvl5,lvl6,lvl7,lvl8,lvl9,lvl10,")
+            // юниты
+            val unitFeatureQuan = 9
+            repeat((rounds.first().size - locationFeatureQuan - levelFeatureQuan - 1) / unitFeatureQuan) {
+                writer.write("ev${it},ag${it},ra${it},sh${it},sg${it},gp${it},wr${it},sgc${it},our${it},")
             }
-            // Для 1 на 1 будет такой порядок:
-            //writer.write("evl,agl,ral,shl,sgl,gpl,vrl,lvl1,lvl2,lvl3,lvl4,lvl5,lvl6,lvl7,lvl8,lvl9,lvl10,ev1,ag1,ra1,sh1,sg1,gp1,vr1,sgc1,our1,ev2,ag2,ra2,sh2,sg2,gp2,vr2,sgc2,our2,")
             writer.write("our_gp")
             writer.newLine()
 
             rounds.forEach { row ->
-                writer.write(row.joinToString(",") {
-                    String.format(Locale.ENGLISH, "%.8f", it)
-                })
+                writer.write(row.joinToString(",") { it.format() })
                 writer.newLine()
             }
         }
 }
+
+private fun Float.format() = String.format(Locale.ENGLISH, "%.8f", this)
