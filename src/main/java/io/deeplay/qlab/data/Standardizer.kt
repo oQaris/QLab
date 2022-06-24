@@ -6,14 +6,14 @@ import io.deeplay.qlab.parser.models.output.UnitWithLocation
 class Standardizer(
     var maxPosition: Int,
     val levels: List<Int>,
-    val unitsProfiles: Profiles,
-    val locationsProfiles: Profiles
+    val unitProfiles: Profiles,
+    val locationProfiles: Profiles
 ) {
-    val sizeDataOneUnit = // Длина профиля юнита + дополнительные данные
-        unitsProfiles.entries.first().value.size + 2
+    val sizeDataOneUnit = // Длина профиля юнита + дополнительные данные (наш / не наш, source gold)
+        unitProfiles.entries.first().value.size + 2
 
-    val medianUnitProfile = genMedianProfile(unitsProfiles)
-    val medianLocationProfile = genMedianProfile(locationsProfiles)
+    val medianUnitProfile = genMedianProfile(unitProfiles)
+    val medianLocationProfile = genMedianProfile(locationProfiles)
 
     companion object {
 
@@ -45,14 +45,14 @@ class Standardizer(
     }
 
     fun transform(round: Round): FloatArray {
-        val curRoundNorm = mutableListOf<Float>()
+        val roundStd = mutableListOf<Float>()
         // Профиль локации
-        curRoundNorm.addAll(
-            locationsProfiles[round.locationName]
+        roundStd.addAll(
+            locationProfiles[round.locationName]
                 ?.toList() ?: medianLocationProfile
         )
         // One-Hot encoding уровня
-        curRoundNorm.addAll(
+        roundStd.addAll(
             FloatArray(levels.size)
             { if (levels[it] == round.locationLevel) 1f else 0f }.toList()
         )
@@ -62,7 +62,7 @@ class Standardizer(
                 repeat(maxPosition) { pos ->
                     val unit = units.firstOrNull { it.locatePosition == pos }
                     if (unit != null) {
-                        val rawProfile = unitsProfiles[unit.name]
+                        val rawProfile = unitProfiles[unit.name]
                             ?.toList() ?: medianUnitProfile
                         add(
                             rawProfile // добавляем в конец sourceGold в раунде
@@ -76,10 +76,10 @@ class Standardizer(
                 }
             }
         }.flatten()
-        curRoundNorm.addAll(roundProfiles)
+        roundStd.addAll(roundProfiles)
         // Голд профит
-        curRoundNorm.add((round.ourUnits.sumOf { it.goldProfit }).toFloat())
-        return curRoundNorm.toFloatArray()
+        roundStd.add((round.ourUnits.sumOf { it.goldProfit }).toFloat())
+        return roundStd.toFloatArray()
     }
 
     private fun transpose(src: Collection<FloatArray>) = buildList {
