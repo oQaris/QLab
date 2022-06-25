@@ -10,11 +10,14 @@ import io.deeplay.qlab.parser.models.input.EnemyLocation
 import io.deeplay.qlab.parser.models.output.UnitWithLocation
 import krangl.mean
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
 import java.io.File
 
 
+@DisabledIfEnvironmentVariable(named = "CI", matches = "true")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class StatsEvaluatorTest {
     private val eps = 1E-6
@@ -84,7 +87,8 @@ internal class StatsEvaluatorTest {
             round.ourUnits.map { UnitWithLocation(it.name, it.sourceGoldCount, it.locatePosition, location) }.toSet()
         }
         val answers = ourUnitLists.map { evaluator.evaluateGoldProfit(it) }
+        val errors = ourGoldProfits.mapIndexed { idx, gp -> gp - answers[idx] }
 
-        assertEquals(0.0, answers.mean(), eps)
+        assertEquals(0.0, errors.mean(), eps)
     }
 }
