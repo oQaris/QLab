@@ -10,11 +10,12 @@ import io.deeplay.qlab.parser.models.input.EnemyLocation
 import io.deeplay.qlab.parser.models.output.UnitWithLocation
 import krangl.mean
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.api.assertAll
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
 import java.io.File
+import kotlin.math.abs
 
 
 @DisabledIfEnvironmentVariable(named = "CI", matches = "true")
@@ -30,14 +31,18 @@ internal class StatsEvaluatorTest {
     init {
         val data = splitRounds(
             Parser.parseRoundList(File("testData/anonymized_data.json"))
+                .run { this.filter { it.ourUnits.size == 1 && it.opponentUnits.size == 1 } }
                 .run { RoundListFilter.filter(this) },
-            .2
+            .01
         )
 
         trainData = data.first
         standardizer = Standardizer.fit(trainData)
         testData = data.second
         trainDataStd = standardizer.transformAll(trainData)
+
+        println("Train dataset size: " + trainData.size)
+        println("Test dataset size: " + testData.size)
     }
 
 
@@ -89,6 +94,11 @@ internal class StatsEvaluatorTest {
         val answers = ourUnitLists.map { evaluator.evaluateGoldProfit(it) }
         val errors = ourGoldProfits.mapIndexed { idx, gp -> gp - answers[idx] }
 
-        assertEquals(0.0, errors.mean(), eps)
+        assertAll(
+            { assertEquals(0.0, errors.mean(), eps, "mean") },
+            { assertEquals(0.0, errors.minOf { it }, eps, "min") },
+            { assertEquals(0.0, errors.minOf { abs(it) }, eps, "abs min") },
+            { assertEquals(0.0, errors.maxOf { it }, eps, "max") },
+        )
     }
 }
