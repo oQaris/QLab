@@ -31,24 +31,17 @@ fun main() {
     println("Стандартизация данных...")
     var roundsStd = standardizer.transformAll(rounds, trimMaxPos = true)
 
-    val normContext = genMinimaxNormContext(roundsStd)
+    val normalizer = Normalizer.fitMinimax(roundsStd, -1, 1)
     println("Контекст нормализации:")
-    println(normContext.first.joinToString { it.format() })
-    println(normContext.second.joinToString { it.format() })
+    println(normalizer.context.subtrahend.joinToString { it.format() })
+    println(normalizer.context.divider.joinToString { it.format() })
 
     println("Нормализация данных...")
-    roundsStd = normalize(roundsStd) { normContext }
+    roundsStd = normalizer.transform(roundsStd, roundsStd.first().size - 1)
 
     println("Сохранение в файл...")
-    saveRounds(roundsStd, "trainData/11.csv")
+    saveRounds(roundsStd, "trainData/11n.csv")
     println("Сохранено ${roundsStd.size} ${roundsStd.first().size}-мерных векторов")
-}
-
-private fun normalize(
-    data: List<FloatArray>,
-    normContext: (List<FloatArray>) -> Pair<FloatArray, FloatArray> = ::genZNormContext
-): List<FloatArray> {
-    return data.map { it.applyNormByRow(normContext(data)).toFloatArray() }
 }
 
 private fun saveRounds(rounds: List<FloatArray>, fileName: String) {
@@ -64,7 +57,7 @@ private fun saveRounds(rounds: List<FloatArray>, fileName: String) {
             // юниты
             val unitFeatureQuan = 9
             repeat((rounds.first().size - locationFeatureQuan - levelFeatureQuan - 1) / unitFeatureQuan) {
-                writer.write("ev${it},ag${it},ra${it},sh${it},sg${it},gp${it},wr${it},sgc${it},our${it},")
+                writer.write("ev$it,ag$it,ra$it,sh$it,sg$it,gp$it,wr$it,sgc$it,our$it,")
             }
             writer.write("our_gp")
             writer.newLine()

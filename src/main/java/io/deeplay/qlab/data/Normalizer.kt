@@ -1,63 +1,63 @@
 package io.deeplay.qlab.data
 
-import kotlin.math.pow
-import kotlin.math.sqrt
+class Normalizer(val context: NormContext) {
 
-inline fun <T> Collection<T>.mean(selector: (T) -> Float) =
-    this.sumOf { selector.invoke(it).toDouble() / this.size }.toFloat()
+    companion object {
 
-inline fun <T> Collection<T>.median(selector: (T) -> Float): Float {
-    if (this.isEmpty()) return 0f
-    val sorted = this.map(selector).sorted()
-    val n = this.size
-    return if (n % 2 == 1) sorted[(n - 1) / 2]
-    else (sorted[n / 2 - 1] + sorted[n / 2]) / 2
-}
+        fun fitMinimax(history: List<FloatArray>, from: Int = 0, to: Int = 1) = Normalizer(
+            context = buildList {
+                history.forEachColumn { column ->
+                    val (max, min) = column.maxOf { it } to column.minOf { it }
+                    val mmba = (max - min) / (to - from)
+                    add(min - from * mmba to mmba)
+                }
+            }.toContext()
+        )
 
-inline fun <T> Collection<T>.standardDeviation(selector: (T) -> Float): Float {
-    val mean = this.mean(selector)
-    return sqrt(this.sumOf {
-        (selector(it).toDouble() - mean).pow(2) / this.size
-    }).toFloat()
-}
+        fun fitZNorm(history: List<FloatArray>) = Normalizer(
+            context = buildList {
+                history.forEachColumn { column ->
+                    val (max, min) = column.maxOf { it } to column.minOf { it }
+                    val contextCol = // не трогаем вероятности и one hot
+                        if (max <= 1 && min >= -1) 0f to 1f
+                        else column.contextForNormaZ()
+                    add(contextCol)
+                }
+            }.toContext()
+        )
 
-fun FloatArray.applyNormByRow(context: Pair<FloatArray, FloatArray>): List<Float> {
-    return this.zip(context.first.zip(context.second))
-        .map { (it.first - it.second.first) / it.second.second }
-}
-
-
-fun genMinimaxNormContext(data: List<FloatArray>): Pair<FloatArray, FloatArray> {
-    return buildList {
-        for (nCol in data.first().indices) {
-            val column = data.map { it[nCol] }
-            val (max, min) = column.maxOf { it } to column.minOf { it }
-            add(min to max - min)
+        private fun Collection<Float>.contextForNormaZ(): Pair<Float, Float> {
+            val mean = this.mean { it }
+            val sd = this.standardDeviation { it }
+            return mean to sd
         }
-    }.unzip().let {
-        it.first.toFloatArray() to it.second.toFloatArray()
-    }
-}
 
-fun genZNormContext(data: List<FloatArray>): Pair<FloatArray, FloatArray> {
-    return buildList {
-        for (nCol in data.first().indices) {
-            val column = data.map { it[nCol] }
-            val (max, min) = column.maxOf { it } to column.minOf { it }
-            val contextCol = // не трогаем вероятности и one hot
-                if (max <= 1 && min >= -1) genEmptyNormalizationContext()
-                else column.contextForNormaZ()
-            add(contextCol)
+        private fun Collection<FloatArray>.forEachColumn(action: (List<Float>) -> Unit) {
+            for (nCol in this.first().indices) {
+                val column = this.map { it[nCol] }
+                action(column)
+            }
         }
-    }.unzip().let {
-        it.first.toFloatArray() to it.second.toFloatArray()
+
+        private fun Collection<Pair<Float, Float>>.toContext() = this.unzip().let {
+            NormContext(it.first.toFloatArray(), it.second.toFloatArray())
+        }
+
+        class NormContext(val subtrahend: FloatArray, val divider: FloatArray)
     }
-}
 
-fun genEmptyNormalizationContext() = 0f to 1f
+    fun transform(data: List<FloatArray>, vararg excludingCols: Int): List<FloatArray> {
+        return data.map {
+            it.applyNormByRow(context, excludingCols).toFloatArray()
+        }
+    }
 
-fun Collection<Float>.contextForNormaZ(): Pair<Float, Float> {
-    val mean = this.mean { it }
-    val sd = this.standardDeviation { it }
-    return mean to sd
+    private fun FloatArray.applyNormByRow(context: NormContext, excludingCols: IntArray): List<Float> {
+        return this.zip(context.subtrahend.zip(context.divider))
+            .mapIndexed { idx, triple ->
+                if (idx !in excludingCols)
+                    (triple.first - triple.second.first) / triple.second.second
+                else triple.first
+            }
+    }
 }
