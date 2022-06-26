@@ -1,5 +1,6 @@
 package io.deeplay.qlab.data
 
+import krangl.mean
 import kotlin.math.pow
 import kotlin.math.sqrt
 
@@ -31,4 +32,11 @@ inline fun <T> Collection<T>.standardDeviation(selector: (T) -> Float): Float {
     return sqrt(this.sumOf {
         (selector(it).toDouble() - mean).pow(2) / this.size
     }).toFloat()
+}
+
+fun r2Score(y: List<Double>, yPred: List<Double>): Double {
+    val rss = y.mapIndexed { idx, gp -> (gp - yPred[idx]).pow(2) }.sum()
+    val yMean = y.mean()
+    val tss = y.sumOf { (it - yMean).pow(2) }
+    return 1 - rss / tss
 }

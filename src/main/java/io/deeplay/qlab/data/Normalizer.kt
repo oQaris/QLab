@@ -46,18 +46,18 @@ class Normalizer(val context: NormContext) {
         class NormContext(val subtrahend: FloatArray, val divider: FloatArray)
     }
 
-    fun transform(data: List<FloatArray>, vararg excludingCols: Int): List<FloatArray> {
+    fun transformAll(data: List<FloatArray>, vararg excludingCols: Int): List<FloatArray> {
         return data.map {
-            it.applyNormByRow(context, excludingCols).toFloatArray()
+            transform(it, *excludingCols)
         }
     }
 
-    private fun FloatArray.applyNormByRow(context: NormContext, excludingCols: IntArray): List<Float> {
-        return this.zip(context.subtrahend.zip(context.divider))
+    fun transform(data: FloatArray, vararg excludingCols: Int): FloatArray {
+        return data.zip(context.subtrahend.zip(context.divider))
             .mapIndexed { idx, triple ->
                 if (idx !in excludingCols)
                     (triple.first - triple.second.first) / triple.second.second
                 else triple.first
-            }
+            }.toFloatArray()
     }
 }

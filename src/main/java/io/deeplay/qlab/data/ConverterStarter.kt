@@ -37,7 +37,7 @@ fun main() {
     println(normalizer.context.divider.joinToString { it.format() })
 
     println("Нормализация данных...")
-    roundsStd = normalizer.transform(roundsStd, roundsStd.first().size - 1)
+    roundsStd = normalizer.transformAll(roundsStd, roundsStd.first().size - 1)
 
     println("Сохранение в файл...")
     saveRounds(roundsStd, "trainData/11n.csv")
