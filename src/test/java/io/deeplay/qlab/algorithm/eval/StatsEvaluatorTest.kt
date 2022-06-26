@@ -1,7 +1,7 @@
 package io.deeplay.qlab.algorithm.eval
 
 import io.deeplay.qlab.data.Standardizer
-import io.deeplay.qlab.data.splitRounds
+import io.deeplay.qlab.data.splitData
 import io.deeplay.qlab.parser.Parser
 import io.deeplay.qlab.parser.RoundListFilter
 import io.deeplay.qlab.parser.models.Unit
@@ -29,7 +29,7 @@ internal class StatsEvaluatorTest {
 
 
     init {
-        val data = splitRounds(
+        val data = splitData(
             Parser.parseRoundList(File("testData/anonymized_data.json"))
                 .run { this.filter { it.ourUnits.size == 1 && it.opponentUnits.size == 1 } }
                 .run { RoundListFilter.filter(this) },
