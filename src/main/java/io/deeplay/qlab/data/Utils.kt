@@ -2,6 +2,7 @@ package io.deeplay.qlab.data
 
 import krangl.mean
 import kotlin.math.pow
+import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
 fun <T> splitData(data: List<T>, testFraq: Double, shuffle: Boolean = false): Pair<List<T>, List<T>> {
@@ -32,6 +33,14 @@ inline fun <T> Collection<T>.standardDeviation(selector: (T) -> Float): Float {
     return sqrt(this.sumOf {
         (selector(it).toDouble() - mean).pow(2) / this.size
     }).toFloat()
+}
+
+inline fun <T> Collection<T>.quantile(alpha: Float, selector: (T) -> Float): Float {
+    require(alpha in 0f..1f)
+    if (this.isEmpty()) return 0f
+    val sorted = this.map(selector).sorted()
+    val q = ((this.size - 1) * alpha).roundToInt()
+    return sorted[q]
 }
 
 fun r2Score(y: List<Double>, yPred: List<Double>): Double {

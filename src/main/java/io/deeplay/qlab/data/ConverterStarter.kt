@@ -31,7 +31,7 @@ fun main() {
     println("Стандартизация данных...")
     var roundsStd = standardizer.transformAll(rounds, trimMaxPos = true)
 
-    val normalizer = Normalizer.fitMinimax(roundsStd, -1, 1)
+    val normalizer = Normalizer.fitRobust(roundsStd)
     println("Контекст нормализации:")
     println(normalizer.context.subtrahend.joinToString { it.format() })
     println(normalizer.context.divider.joinToString { it.format() })
@@ -40,7 +40,7 @@ fun main() {
     roundsStd = normalizer.transformAll(roundsStd, roundsStd.first().size - 1)
 
     println("Сохранение в файл...")
-    saveRounds(roundsStd, "trainData/11n.csv")
+    saveRounds(roundsStd, "trainData/11rb.csv")
     println("Сохранено ${roundsStd.size} ${roundsStd.first().size}-мерных векторов")
 }
 

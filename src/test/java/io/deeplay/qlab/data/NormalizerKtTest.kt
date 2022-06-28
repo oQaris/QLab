@@ -17,4 +17,15 @@ internal class NormalizerKtTest {
     fun standardDeviationTest() {
         assertEquals(3.559026084010437f, data.standardDeviation { it.toFloat() }, eps)
     }
+
+    @Test
+    fun quantileTest() {
+        assertEquals(2f, data.quantile(0.75f) { it.toFloat() }, eps)
+        assertEquals(0f, data.quantile(0.25f) { it.toFloat() }, eps)
+    }
+
+    @Test
+    fun quantileMedianTest() {
+        assertEquals(data.median { it.toFloat() }, data.quantile(0.5f) { it.toFloat() }, eps)
+    }
 }

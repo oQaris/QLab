@@ -16,8 +16,7 @@ class StatsEvaluator(trainData: List<Round>) : IEvaluator {
         val stdRounds = standardizer.transformAll(trainData)
         val endCol = stdRounds.first().size - 1
 
-        // TODO - вместо первого будет робасный
-        normalizer1 = Normalizer.fitZNorm(stdRounds)
+        normalizer1 = Normalizer.fitRobust(stdRounds)
         val norm1Rounds = normalizer1.transformAll(stdRounds, endCol)
 
         normalizer2 = Normalizer.fitMinimax(norm1Rounds)
@@ -27,7 +26,8 @@ class StatsEvaluator(trainData: List<Round>) : IEvaluator {
     override fun evaluateGoldProfit(units: Set<UnitWithLocation>): Double {
         return units.groupBy { it.location.locationName }
             .entries.sumOf { (_, units) ->
-                val roundNorm = normalizer2.transform(normalizer1.transform(standardizer.transform(units)))
+                val vec = standardizer.transform(units)
+                val roundNorm = normalizer2.transform(normalizer1.transform(vec))
                 predictGold(roundNorm).toDouble()
             }
     }

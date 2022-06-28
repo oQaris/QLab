@@ -17,19 +17,32 @@ class Normalizer(val context: NormContext) {
         fun fitZNorm(history: List<FloatArray>) = Normalizer(
             context = buildList {
                 history.forEachColumn { column ->
-                    val (max, min) = column.maxOf { it } to column.minOf { it }
-                    val contextCol = // не трогаем вероятности и one hot
-                        if (max <= 1 && min >= -1) 0f to 1f
-                        else column.contextForNormaZ()
-                    add(contextCol)
+                    add(orEmptyNorm(column) {
+                        val mean = column.mean { it }
+                        val sd = column.standardDeviation { it }
+                        mean to sd
+                    })
                 }
             }.toContext()
         )
 
-        private fun Collection<Float>.contextForNormaZ(): Pair<Float, Float> {
-            val mean = this.mean { it }
-            val sd = this.standardDeviation { it }
-            return mean to sd
+        fun fitRobust(history: List<FloatArray>) = Normalizer(
+            context = buildList {
+                history.forEachColumn { column ->
+                    add(orEmptyNorm(column) {
+                        val median = column.median { it }
+                        val q25 = column.quantile(0.25f) { it }
+                        val q75 = column.quantile(0.75f) { it }
+                        median to q75 - q25
+                    })
+                }
+            }.toContext()
+        )
+
+        private fun orEmptyNorm(column: Collection<Float>, context: () -> Pair<Float, Float>): Pair<Float, Float> {
+            val (max, min) = column.maxOf { it } to column.minOf { it }
+            return if (max <= 1 && min >= -1) 0f to 1f
+            else context()
         }
 
         private fun Collection<FloatArray>.forEachColumn(action: (List<Float>) -> Unit) {

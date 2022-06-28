@@ -1,5 +1,6 @@
 package io.deeplay.qlab.algorithm.eval
 
+import io.deeplay.qlab.data.median
 import io.deeplay.qlab.data.r2Score
 import io.deeplay.qlab.data.splitData
 import io.deeplay.qlab.parser.Parser
@@ -27,9 +28,9 @@ internal class StatsEvaluatorTest {
     init {
         val data = splitData(
             Parser.parseRoundList(File("testData/anonymized_data.json"))
-                .run { filter { it.ourUnits.size == 1 && it.opponentUnits.size == 1 } }
+                //.run { filter { it.ourUnits.size == 1 && it.opponentUnits.size == 1 } }
                 .run { RoundListFilter.filter(this) },
-            0.005
+            0.001
         )
         trainData = data.first
         testData = data.second
@@ -54,6 +55,7 @@ internal class StatsEvaluatorTest {
         val errors = ourGoldProfits.mapIndexed { idx, gp -> abs(gp - answers[idx]) }
 
         println("Средняя ошибка: ${errors.mean()}")
+        println("Медианная ошибка: ${errors.median { it.toFloat() }}")
         println("Максимальная ошибка: ${errors.maxOf { it }}")
         println("R2 score: ${r2Score(ourGoldProfits, answers)}")
     }
