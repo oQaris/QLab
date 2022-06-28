@@ -38,8 +38,11 @@ inline fun <T> Collection<T>.quantile(alpha: Float, selector: (T) -> Float): Flo
     require(alpha in 0f..1f)
     if (this.isEmpty()) return 0f
     val sorted = this.map(selector).sorted()
-    val q = ((this.size + 1) * alpha).toInt() - 1
-    return sorted[q]
+    val floatIdx = (this.size - 1) * alpha
+    val idxInt = floatIdx.toInt()
+    val idxFrac = floatIdx - idxInt
+    return if (idxFrac < 1e-5) sorted[idxInt]
+    else sorted[idxInt] * (1 - idxFrac) + sorted[idxInt + 1] * idxFrac
 }
 
 fun r2Score(y: List<Double>, yPred: List<Double>): Double {
