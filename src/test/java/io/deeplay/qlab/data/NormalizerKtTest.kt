@@ -21,7 +21,7 @@ internal class NormalizerKtTest {
     @Test
     fun quantileTest() {
         assertEquals(2f, data.quantile(0.75f) { it.toFloat() }, eps)
-        assertEquals(0f, data.quantile(0.25f) { it.toFloat() }, eps)
+        assertEquals(-1f, data.quantile(0.25f) { it.toFloat() }, eps)
     }
 
     @Test
